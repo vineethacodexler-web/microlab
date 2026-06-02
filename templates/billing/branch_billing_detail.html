@@ -1,0 +1,69 @@
+{% include 'admin_navbar.html' %}
+
+<div class="main-content">
+
+    <div class="card">
+
+        <div class="card-header">
+            Billing Details
+        </div>
+
+        <div class="card-body">
+
+            <h5>
+                Branch :
+                {{ branch.registration.First_name }}
+            </h5>
+
+            <table class="table table-bordered mt-3">
+
+                <thead>
+
+                    <tr>
+                        <th>Activity</th>
+                        <th>Count</th>
+                        <th>Total Amount</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for row in activity_summary %}
+
+                    <tr>
+
+                        <td>
+                            {{ row.activity__name }}
+                        </td>
+
+                        <td>
+                            {{ row.total_count }}
+                        </td>
+
+                        <td>
+                            ₹ {{ row.total_amount }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            <div class="alert alert-info">
+
+                <strong>
+                    Total Due :
+                    ₹ {{ total_due }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

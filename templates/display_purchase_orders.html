@@ -1,0 +1,1004 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Purchase Orders</title>
+
+<style>
+:root {
+    --po-navbar-height: 70px;
+    --po-primary: #1f4e8c;
+    --po-bg: #f4f7fb;
+    --po-border: #e5e7eb;
+}
+
+body {
+    margin: 0;
+    background: var(--po-bg);
+    font-size: 13px;
+    color: #1f2937;
+    overflow-x: hidden;
+}
+
+/* NAVBAR */
+.po-navbar-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+    background: #ffffff;
+    box-shadow: 0 3px 14px rgba(15, 23, 42, 0.08);
+}
+
+/* PAGE */
+.po-page-wrapper {
+    padding: 12px 14px 22px;
+}
+
+/* STICKY FILTER */
+.sticky-filter-bar {
+    position: sticky;
+    top: var(--po-navbar-height);
+    z-index: 1080;
+    background: #ffffff;
+    padding: 12px;
+    border: 1px solid var(--po-border);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.07);
+    margin-bottom: 12px;
+}
+
+.po-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.sticky-filter-bar label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 3px;
+}
+
+.form-control-sm,
+.form-select-sm {
+    min-height: 30px;
+    font-size: 11.5px;
+    border-radius: 8px;
+    border: 1px solid #dbe3ef;
+    box-shadow: none !important;
+}
+
+.form-control-sm:focus,
+.form-select-sm:focus {
+    border-color: var(--po-primary);
+}
+
+.btn {
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 6px 11px;
+    line-height: 1.2;
+}
+
+.export-note {
+    font-size: 11px;
+    color: #64748b;
+    padding-top: 4px;
+}
+
+/* TABLE CARD */
+.po-table-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 8px;
+    border: 1px solid var(--po-border);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+/* TABLE SCROLL */
+.table-responsive {
+    max-height: calc(100vh - 250px);
+    overflow: auto;
+    border-radius: 12px;
+}
+
+#ordersTable {
+    margin-bottom: 0;
+    white-space: nowrap;
+    width: 100%;
+}
+
+#ordersTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--po-primary);
+    color: #ffffff;
+    font-size: 12px;
+            font-weight: bold;
+    font-weight: 800;
+    padding: 8px 6px;
+    text-align: center;
+    vertical-align: middle;
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+#ordersTable td {
+    font-size: 12px;
+            font-weight: bold;
+    padding: 7px 6px;
+    text-align: center;
+    vertical-align: middle;
+    color: #334155;
+}
+
+#ordersTable tbody tr.po-group-even td {
+    background: #ffffff;
+}
+
+#ordersTable tbody tr.po-group-odd td {
+    background: #f3f8ff;
+}
+
+#ordersTable tbody tr:hover td {
+    background: #edf5ff !important;
+}
+
+#ordersTable tbody tr.selected-export-row td {
+    background: #fff7d6 !important;
+}
+
+#ordersTable tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 25;
+    background: #f1f5f9 !important;
+    font-size: 11px;
+    font-weight: 800;
+    color: #0f172a;
+    padding: 8px 6px;
+}
+
+.text-end {
+    text-align: right !important;
+}
+
+/* STATUS BUTTONS */
+.status-btn {
+    border: none;
+    border-radius: 7px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    min-width: 78px;
+}
+
+.status-completed {
+    background: #d1f7dc;
+    color: #146c43;
+}
+
+.status-waiting {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-undo {
+    background: #f27b63;
+    color: #ffffff;
+    min-width: 34px;
+}
+
+.status-place {
+    background: #898ce8;
+    color: #ffffff;
+}
+
+/* ACTION */
+.action-btns {
+    min-width: 76px;
+}
+
+.action-btns a {
+    width: 29px;
+    height: 29px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin: 1px;
+    padding: 0 !important;
+}
+
+/* CHECKBOX */
+.form-check-input,
+#selectAll,
+.rowCheckbox {
+    width: 13px;
+    height: 13px;
+    cursor: pointer;
+}
+
+/* EMPTY */
+.empty-row {
+    height: 90px;
+    font-size: 13px !important;
+    color: #64748b !important;
+    background: #ffffff !important;
+}
+
+/* PAGINATION */
+.pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.page-link {
+    font-size: 12px;
+    border-radius: 8px;
+    border: 1px solid #dbe3ef;
+    color: var(--po-primary);
+}
+
+.page-item.active .page-link {
+    background: var(--po-primary);
+    border-color: var(--po-primary);
+}
+
+/* SWEET ALERT FIX */
+.swal2-container {
+    z-index: 99999 !important;
+}
+
+.swal2-popup {
+    width: 420px !important;
+    max-width: 90vw !important;
+    padding: 22px 24px !important;
+    border-radius: 12px !important;
+}
+
+.swal2-icon {
+    width: 70px !important;
+    height: 70px !important;
+    margin: 5px auto 18px !important;
+}
+
+.swal2-title {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    padding: 0 !important;
+}
+
+.swal2-html-container {
+    font-size: 15px !important;
+    margin: 12px 0 18px !important;
+}
+
+.swal2-actions {
+    gap: 8px !important;
+}
+
+.swal2-confirm,
+.swal2-cancel {
+    font-size: 13px !important;
+    padding: 9px 16px !important;
+    border-radius: 6px !important;
+}
+
+/* MOBILE */
+@media (max-width: 991px) {
+    :root {
+        --po-navbar-height: 60px;
+    }
+
+    .sticky-filter-bar {
+        top: var(--po-navbar-height);
+    }
+
+    .po-filter-actions,
+    .po-export-actions {
+        width: 100%;
+    }
+
+    .po-filter-actions .btn,
+    .po-export-actions .btn {
+        flex: 1;
+    }
+
+    .table-responsive {
+        max-height: calc(100vh - 300px);
+    }
+}
+
+@media (max-width: 576px) {
+    :root {
+        --po-navbar-height: 58px;
+    }
+
+    .po-page-wrapper {
+        padding: 8px;
+    }
+
+    .sticky-filter-bar {
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .po-title {
+        font-size: 15px;
+    }
+
+    .po-table-card {
+        padding: 5px;
+    }
+
+    #ordersTable thead th,
+    #ordersTable td {
+        font-size: 9.5px;
+        padding: 5px;
+    }
+
+    .status-btn {
+        font-size: 10px;
+        min-width: 70px;
+        padding: 4px 7px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+{% include 'links.html' %}
+
+<div class="po-navbar-wrap">
+    {% include 'navbar3.html' %}
+</div>
+
+<div class="po-page-wrapper">
+
+    <div class="sticky-filter-bar">
+        <h5 class="po-title">Purchase Orders</h5>
+
+        <form method="get" action="{% url 'view_purchase_orders' %}" class="row g-2 align-items-end">
+
+            <div class="col-lg-auto col-md-3 col-6">
+                <label>Per Page</label>
+                <select name="per_page" class="form-select form-select-sm">
+                    {% for option in per_page_options %}
+                    <option value="{{ option }}" {% if per_page == option %}selected{% endif %}>
+                        {{ option }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-3 col-6">
+                <label>Vendor</label>
+                <select name="vendor" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for vendor in vendors %}
+                    <option value="{{ vendor.name }}" {% if vendor_name == vendor.name %}selected{% endif %}>
+                        {{ vendor.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-lg-auto col-md-3 col-6">
+                <label>Status</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    <option value="place order" {% if status == 'place order' %}selected{% endif %}>Purchase Order</option>
+                    <option value="in progress" {% if status == 'in progress' %}selected{% endif %}>In Progress</option>
+                    <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+
+            <div class="col-lg-auto col-md-3 col-6">
+                <label>Date</label>
+                <select name="date_range" id="dateRangeSelect" class="form-select form-select-sm">
+                    <option value="all" {% if date_range == 'all' %}selected{% endif %}>All</option>
+                    <option value="today" {% if date_range == 'today' %}selected{% endif %}>Today</option>
+                    <option value="week" {% if date_range == 'week' %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if date_range == 'month' %}selected{% endif %}>This Month</option>
+                    <option value="year" {% if date_range == 'year' %}selected{% endif %}>This Year</option>
+                    <option value="custom" {% if date_range == 'custom' %}selected{% endif %}>Custom</option>
+                </select>
+            </div>
+
+            <div class="col-lg-auto col-md-6 col-12 {% if date_range != 'custom' %}d-none{% endif %}" id="customDateFields">
+                <label>Custom Date</label>
+                <div class="d-flex gap-1">
+                    <input type="date" name="date_from" value="{{ date_from }}" class="form-control form-control-sm">
+                    <input type="date" name="date_to" value="{{ date_to }}" class="form-control form-control-sm">
+                </div>
+            </div>
+
+            <div class="col-lg-auto col-md-6 col-12">
+                <div class="d-flex gap-2 po-filter-actions">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-filter me-1"></i> Apply
+                    </button>
+
+                    <a href="{% url 'view_purchase_orders' %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-rotate-left me-1"></i> Clear
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-auto col-md-12 ms-lg-auto col-12">
+                <div class="d-flex gap-2 po-export-actions justify-content-lg-end">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="bulkDelete()">
+                        <i class="fas fa-trash me-1"></i> Delete
+                    </button>
+
+                    <button type="button" class="btn btn-success btn-sm" onclick="exportExcel()">
+                        <i class="fas fa-file-excel me-1"></i> Excel
+                    </button>
+
+                    <button type="button" class="btn btn-danger btn-sm" onclick="exportPDF()">
+                        <i class="fas fa-file-pdf me-1"></i> PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div id="filterInfo" class="export-note">
+                    Vendor: {% if vendor_name %}{{ vendor_name }}{% else %}All{% endif %} |
+                    Status: {% if status %}{{ status }}{% else %}All{% endif %} |
+                    Date: {% if date_range %}{{ date_range }}{% else %}All{% endif %}
+                    {% if date_range == 'custom' %}
+                    | From: {{ date_from }} To: {{ date_to }}
+                    {% endif %}
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="po-table-card">
+        <div class="table-responsive">
+            <table id="ordersTable" class="table table-bordered table-sm align-middle">
+
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th>PO</th>
+                        <th>Date</th>
+                        <th>Vendor</th>
+                        <th>Company</th>
+                        <th>Item</th>
+                        <th>HSN</th>
+                        <th>Pack</th>
+                        <th class="text-end">Price</th>
+                        <th class="text-end">GST</th>
+                        <th class="text-end">Qty</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-end">Total</th>
+                        <th>Status</th>
+                        <th colspan="2">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for po in purchase_orders|dictsortreversed:"id" %}
+                    {% cycle 'po-group-even' 'po-group-odd' as po_group_class silent %}
+                    {% with line_count=po.order_lines.count %}
+
+                    {% if line_count > 0 %}
+                        {% for line in po.order_lines.all %}
+                        <tr data-po-id="{{ po.id }}" class="{{ po_group_class }}">
+
+                            {% if forloop.first %}
+                            <td rowspan="{{ line_count }}">
+                                <input type="checkbox" class="rowCheckbox" value="{{ po.id }}">
+                            </td>
+
+                            <td rowspan="{{ line_count }}">{{ po.invoice_number|default:"-" }}</td>
+                            <td rowspan="{{ line_count }}">{{ po.dateField|date:"Y-m-d" }}</td>
+                            {% endif %}
+
+                            <td>{{ line.item.vendor.name|default:"-" }}</td>
+                            <td>{{ line.item.company_name|default:"-" }}</td>
+                            <td>{{ line.item.name|default:"-" }}</td>
+                            <td>{{ line.hsn|default:"-" }}</td>
+                            <td>{{ line.pack|default:"-" }}</td>
+
+                            <td class="text-end">{{ line.price|default:"0.00" }}</td>
+                            <td class="text-end">{{ line.gst|default:"0" }}</td>
+                            <td class="text-end">{{ line.qty|default:"0" }}</td>
+
+                            <td class="amount text-end">{{ line.amount|default:"0.00" }}</td>
+                            <td class="total text-end">{{ line.total_amount|default:"0.00" }}</td>
+
+                            {% if forloop.first %}
+                            <td rowspan="{{ line_count }}">
+
+                                {% if po.invoice_set.all %}
+                                    {% with po.invoice_set.all|first as invoice %}
+
+                                        {% if invoice.status == "Paid" %}
+                                        <button class="status-btn status-completed" disabled>
+                                            <i class="fa-solid fa-circle-check me-1"></i> Completed
+                                        </button>
+                                        {% else %}
+
+                                        <div class="d-flex justify-content-center align-items-center gap-1">
+                                            <button class="status-btn status-waiting" disabled>
+                                                <i class="fa-solid fa-clock me-1"></i> Waiting
+                                            </button>
+
+                                            <form method="post" action="{% url 'undo_invoice_from_po' pk=po.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="status-btn status-undo">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        {% endif %}
+
+                                    {% endwith %}
+                                {% else %}
+
+                                <form method="post" action="{% url 'place_purchase_order' po.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="status-btn status-place">
+                                        Place Order
+                                    </button>
+                                </form>
+
+                                {% endif %}
+                            </td>
+
+                            <td rowspan="{{ line_count }}" class="action-btns">
+                                <a href="{% url 'purchase_order_detail' po.id %}" class="btn btn-info btn-sm text-white">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <a href="{% url 'update_purchase_order' po.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                            {% endif %}
+
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% endwith %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="16" class="text-center empty-row">
+                            <i class="fa-regular fa-folder-open me-2"></i>
+                            No records found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <td colspan="11" class="text-end">Grand Total:</td>
+                        <td id="amountTotal" class="text-end">0.00</td>
+                        <td id="totalAmountTotal" class="text-end">0.00</td>
+                        <td colspan="3"></td>
+                    </tr>
+                </tfoot>
+
+            </table>
+        </div>
+    </div>
+
+    <nav class="mt-3">
+        <ul class="pagination">
+            {% if purchase_orders.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ purchase_orders.previous_page_number }}&{{ current_filters }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for num in purchase_orders.paginator.page_range %}
+            <li class="page-item {% if purchase_orders.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}&{{ current_filters }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if purchase_orders.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ purchase_orders.next_page_number }}&{{ current_filters }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const selectAll = document.getElementById("selectAll");
+    const dateRangeSelect = document.getElementById("dateRangeSelect");
+
+    if (selectAll) {
+        selectAll.addEventListener("change", function () {
+            document.querySelectorAll(".rowCheckbox").forEach(cb => {
+                cb.checked = this.checked;
+                toggleSelectedRows(cb.value, cb.checked);
+            });
+        });
+    }
+
+    document.querySelectorAll(".rowCheckbox").forEach(cb => {
+        cb.addEventListener("change", function () {
+            toggleSelectedRows(this.value, this.checked);
+            updateSelectAllStatus();
+        });
+    });
+
+    if (dateRangeSelect) {
+        dateRangeSelect.addEventListener("change", toggleCustomDate);
+    }
+
+    calculateTotals();
+    toggleCustomDate();
+});
+
+function toggleSelectedRows(poId, checked) {
+    document.querySelectorAll(`#ordersTable tbody tr[data-po-id="${poId}"]`).forEach(row => {
+        row.classList.toggle("selected-export-row", checked);
+    });
+}
+
+function updateSelectAllStatus() {
+    const all = document.querySelectorAll(".rowCheckbox");
+    const checked = document.querySelectorAll(".rowCheckbox:checked");
+    const selectAll = document.getElementById("selectAll");
+
+    if (selectAll) {
+        selectAll.checked = all.length > 0 && all.length === checked.length;
+    }
+}
+
+function toggleCustomDate() {
+    const dateRangeSelect = document.getElementById("dateRangeSelect");
+    const customDateFields = document.getElementById("customDateFields");
+
+    if (!dateRangeSelect || !customDateFields) return;
+
+    customDateFields.classList.toggle("d-none", dateRangeSelect.value !== "custom");
+}
+
+function calculateTotals() {
+    let amount = 0;
+    let total = 0;
+
+    document.querySelectorAll("#ordersTable tbody tr[data-po-id]").forEach(row => {
+        amount += parseFloat(row.querySelector(".amount")?.innerText.replace(/,/g, "")) || 0;
+        total += parseFloat(row.querySelector(".total")?.innerText.replace(/,/g, "")) || 0;
+    });
+
+    document.getElementById("amountTotal").innerText = amount.toFixed(2);
+    document.getElementById("totalAmountTotal").innerText = total.toFixed(2);
+}
+
+function bulkDelete() {
+    const selected = Array.from(document.querySelectorAll(".rowCheckbox:checked")).map(cb => cb.value);
+
+    if (selected.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "No PO Selected",
+            text: "Please select at least one purchase order to delete."
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Selected purchase orders will be permanently deleted!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, Delete",
+        cancelButtonText: "Cancel",
+        width: 420
+    }).then(result => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: "Deleting...",
+                text: "Please wait",
+                allowOutsideClick: false,
+                width: 360,
+                didOpen: () => {
+                    Swal.showLoading();
+
+                    fetch("{% url 'bulk_delete_purchase_orders' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: JSON.stringify({ ids: selected })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Delete Failed",
+                                text: "Something went wrong. Please try again."
+                            });
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Delete Failed",
+                            text: "Network error. Please try again."
+                        });
+                    });
+                }
+            });
+        }
+    });
+}
+
+function getExportModeSelectedIds() {
+    return Array.from(document.querySelectorAll(".rowCheckbox:checked")).map(cb => cb.value);
+}
+
+function getStatusText(td) {
+    if (!td) return "";
+    const btn = td.querySelector("button");
+    return btn ? btn.innerText.trim() : td.innerText.trim();
+}
+
+function extractTableData() {
+    const selectedIds = getExportModeSelectedIds();
+    const exportOnlySelected = selectedIds.length > 0;
+
+    const headers = [
+        "PO",
+        "Date",
+        "Vendor",
+        "Company",
+        "Item",
+        "HSN",
+        "Pack",
+        "Price",
+        "GST",
+        "Qty",
+        "Amount",
+        "Total",
+        "Status"
+    ];
+
+    const rows = [];
+    const groupedRows = {};
+
+    document.querySelectorAll("#ordersTable tbody tr[data-po-id]").forEach(tr => {
+        const poId = tr.dataset.poId;
+        if (!groupedRows[poId]) groupedRows[poId] = [];
+        groupedRows[poId].push(tr);
+    });
+
+    Object.keys(groupedRows).forEach(poId => {
+        if (exportOnlySelected && !selectedIds.includes(poId)) {
+            return;
+        }
+
+        const trList = groupedRows[poId];
+
+        let poNumber = "";
+        let poDate = "";
+        let statusText = "";
+
+        trList.forEach((tr, index) => {
+            const cells = Array.from(tr.children);
+
+            let vendor = "";
+            let company = "";
+            let item = "";
+            let hsn = "";
+            let pack = "";
+            let price = "";
+            let gst = "";
+            let qty = "";
+            let amount = "";
+            let total = "";
+
+            if (index === 0) {
+                poNumber = cells[1]?.innerText.trim() || "";
+                poDate = cells[2]?.innerText.trim() || "";
+
+                vendor = cells[3]?.innerText.trim() || "";
+                company = cells[4]?.innerText.trim() || "";
+                item = cells[5]?.innerText.trim() || "";
+                hsn = cells[6]?.innerText.trim() || "";
+                pack = cells[7]?.innerText.trim() || "";
+                price = cells[8]?.innerText.trim() || "";
+                gst = cells[9]?.innerText.trim() || "";
+                qty = cells[10]?.innerText.trim() || "";
+                amount = cells[11]?.innerText.trim() || "";
+                total = cells[12]?.innerText.trim() || "";
+                statusText = getStatusText(cells[13]);
+            } else {
+                vendor = cells[0]?.innerText.trim() || "";
+                company = cells[1]?.innerText.trim() || "";
+                item = cells[2]?.innerText.trim() || "";
+                hsn = cells[3]?.innerText.trim() || "";
+                pack = cells[4]?.innerText.trim() || "";
+                price = cells[5]?.innerText.trim() || "";
+                gst = cells[6]?.innerText.trim() || "";
+                qty = cells[7]?.innerText.trim() || "";
+                amount = cells[8]?.innerText.trim() || "";
+                total = cells[9]?.innerText.trim() || "";
+            }
+
+            rows.push([
+                poNumber,
+                poDate,
+                vendor,
+                company,
+                item,
+                hsn,
+                pack,
+                price,
+                gst,
+                qty,
+                amount,
+                total,
+                statusText
+            ]);
+        });
+    });
+
+    return {
+        headers,
+        rows,
+        exportOnlySelected
+    };
+}
+
+function calculateExportTotals(rows) {
+    let amount = 0;
+    let total = 0;
+
+    rows.forEach(row => {
+        amount += parseFloat(String(row[10]).replace(/,/g, "")) || 0;
+        total += parseFloat(String(row[11]).replace(/,/g, "")) || 0;
+    });
+
+    return {
+        amount: amount.toFixed(2),
+        total: total.toFixed(2)
+    };
+}
+
+function exportExcel() {
+    const data = extractTableData();
+
+    if (data.rows.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "No Data Available",
+            text: "No purchase order data available to export."
+        });
+        return;
+    }
+
+    const totals = calculateExportTotals(data.rows);
+    const filterInfo = document.getElementById("filterInfo")?.innerText || "";
+    const modeText = data.exportOnlySelected ? "Export Type: Selected Purchase Orders" : "Export Type: Displayed Filtered Purchase Orders";
+
+    const totalRow = new Array(data.headers.length).fill("");
+    totalRow[9] = "Grand Total:";
+    totalRow[10] = totals.amount;
+    totalRow[11] = totals.total;
+
+    const excelData = [
+        ["Purchase Orders"],
+        [filterInfo],
+        [modeText],
+        [],
+        data.headers,
+        ...data.rows,
+        totalRow
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+    ws["!cols"] = data.headers.map(() => ({ wch: 18 }));
+
+    ws["!merges"] = [
+        {
+            s: { r: 0, c: 0 },
+            e: { r: 0, c: data.headers.length - 1 }
+        }
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, "Purchase Orders");
+    XLSX.writeFile(wb, data.exportOnlySelected ? "selected_purchase_orders.xlsx" : "filtered_purchase_orders.xlsx");
+}
+
+function exportPDF() {
+    const data = extractTableData();
+
+    if (data.rows.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "No Data Available",
+            text: "No purchase order data available to export."
+        });
+        return;
+    }
+
+    const totals = calculateExportTotals(data.rows);
+    const filterInfo = document.getElementById("filterInfo")?.innerText || "";
+    const modeText = data.exportOnlySelected ? "Export Type: Selected Purchase Orders" : "Export Type: Displayed Filtered Purchase Orders";
+
+    const totalRow = new Array(data.headers.length).fill("");
+    totalRow[9] = "Grand Total:";
+    totalRow[10] = totals.amount;
+    totalRow[11] = totals.total;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("l", "pt", "a4");
+
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Purchase Orders", 40, 25);
+
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text(filterInfo, 40, 43);
+    doc.text(modeText, 40, 58);
+
+    doc.autoTable({
+        head: [data.headers],
+        body: [...data.rows, totalRow],
+        startY: 75,
+        theme: "grid",
+        styles: {
+            fontSize: 7,
+            cellPadding: 3
+        },
+        headStyles: {
+            fillColor: [31, 78, 140],
+            textColor: 255,
+            fontStyle: "bold"
+        },
+        alternateRowStyles: {
+            fillColor: [245, 249, 255]
+        },
+        columnStyles: {
+            7: { halign: "right" },
+            8: { halign: "right" },
+            9: { halign: "right" },
+            10: { halign: "right" },
+            11: { halign: "right" }
+        },
+        didParseCell: function (cellData) {
+            if (cellData.row.index === data.rows.length) {
+                cellData.cell.styles.fontStyle = "bold";
+                cellData.cell.styles.fillColor = [241, 245, 249];
+            }
+        }
+    });
+
+    doc.save(data.exportOnlySelected ? "selected_purchase_orders.pdf" : "filtered_purchase_orders.pdf");
+}
+</script>
+
+</body>
+</html>

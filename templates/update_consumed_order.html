@@ -1,0 +1,285 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Consumed Order</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .bg-light-blue {
+            background-color: #e9f2ff;
+        }
+    </style>
+</head>
+<body>
+{% include 'navbar3.html' %}
+
+<div  class=" mt-3" style="padding: 15px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><strong>Update Consumed Order</strong></h4>
+        <a href="{% url 'custom_consumed' %}" class="btn btn-primary btn-sm">View Consumed</a>
+    </div>
+
+    {% include 'messages.html' %}
+
+    <form method="POST" action="{% url 'update_consumed_order' order.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="invoice_number" value="PO-{{ timestamp|default:'001' }}">
+        <input type="hidden" name="vendor_id" id="vendor_hidden"
+        {% if order.vendor %} value="{{ order.vendor.id }}"{% endif %}>
+        <input type="hidden" name="company" id="company_hidden"
+        {% if order.company %} value="{{ order.company }}"{% endif %}>
+
+        <!-- Date -->
+        <div class="mb-3">
+            <label for="dateField" class="form-label">Date:</label>
+            <input type="date" id="dateField" name="created_at" class="form-control w-auto d-inline-block"
+                   value="{% if order.created_at %}{{ order.created_at|date:'Y-m-d' }}{% else %}{{ current_date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Type Selection -->
+        <div class="mb-3">
+            <!-- Radio: Item -->
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="type" id="itemRadio" value="item"
+                       {% if not order.vendor %}checked{% endif %}>
+                <label class="form-check-label" for="itemRadio">Item</label>
+            </div>
+
+            <!-- Item Select -->
+            <select class="form-select d-inline-block w-auto ms-2" id="item_select" name="item_id">
+                <option value="">-- Select Item --</option>
+                {% for item in items %}
+                    <option value="{{ item.id }}"
+                    {% if order.line_set.first %}
+                        {% if order.line_set.first.item.id == item.id %}selected{% endif %}
+                    {% endif %}>
+                        {{ item.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <!-- Radio: Vendor -->
+            <div class="form-check form-check-inline ms-3">
+                <input class="form-check-input" type="radio" name="type" id="vendorRadio" value="vendor"
+                       {% if order.vendor %}checked{% endif %}>
+                <label class="form-check-label" for="vendorRadio">Vendor</label>
+            </div>
+
+            <!-- Vendor Select -->
+            <select class="form-select d-inline-block w-auto ms-2" id="vendor_select" name="vendor_select_id">
+                <option value="">-- Select Vendor --</option>
+                {% for vendor in vendors %}
+                    <option value="{{ vendor.id }}"
+                    {% if order.vendor %}
+                        {% if order.vendor.id == vendor.id %}selected{% endif %}
+                    {% endif %}>
+                        {{ vendor.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>  <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Item</th>
+                    <th>Company</th>
+                    <th>Price</th>
+                    <th>Pack</th>
+                    <th>Stock</th>
+                    <th>GST</th>
+                    <th>HSN</th>
+                    <th>Qty</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="manualEntryBody">
+                <tr id="manualRow">
+                    <td><input type="text" id="name" class="form-control"></td>
+                    <td><input type="text" id="company" class="form-control"></td>
+                    <td><input type="number" id="price" class="form-control" step="0.01"></td>
+                    <td><input type="text" id="pack" class="form-control"></td>
+                    <td><input type="number" id="stock" class="form-control" step="0.01"></td>
+                    <td><input type="number" id="gst" class="form-control" step="0.01"></td>
+                    <td><input type="text" id="hsn" class="form-control"></td>
+                    <td><input type="number" id="qty" class="form-control" step="0.01"></td>
+                    <td>
+                        <button type="button" class="btn btn-success btn-sm" onclick="addManualToTable()">Add</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Added Items Table -->
+        <h5 class="mt-4 mb-2"><strong>Added Items</strong></h5>
+        <table class="table table-bordered bg-light-blue" id="addedItemsTable">
+            <thead class="table-primary">
+                <tr>
+                    <th>Item</th>
+                    <th>Company</th>
+                    <th>Price</th>
+                    <th>Pack</th>
+                    <th>Stock</th>
+                    <th>GST</th>
+                    <th>HSN</th>
+                    <th>Qty</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in lines %}
+                <tr>
+                    <td><input type="text" name="name[]" value="{{ line.item.name }}" class="form-control" readonly></td>
+                    <td><input type="text" name="company[]" value="{{ line.item.company_name }}" class="form-control" readonly></td>
+                    <td><input type="number" name="price[]" value="{{ line.price }}" class="form-control" step="0.01" readonly></td>
+                    <td><input type="text" name="pack[]" value="{{ line.pack }}" class="form-control" readonly></td>
+                    <td><input type="number" name="stock[]" value="{{ line.stock }}" class="form-control" step="0.01" readonly></td>
+                    <td><input type="number" name="gst[]" value="{{ line.gst }}" class="form-control" step="0.01" readonly></td>
+                    <td><input type="text" name="hsn[]" value="{{ line.hsn }}" class="form-control" readonly></td>
+                    <td>
+                        <input type="number" name="qty[]" value="{{ line.qty }}" class="form-control" step="0.01">
+                        <input type="hidden" name="item_id[]" value="{{ line.item.id }}">
+                    </td>
+                    <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-end mt-3 gap-2">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.history.back();">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const itemRadio = document.getElementById('itemRadio');
+    const vendorRadio = document.getElementById('vendorRadio');
+    const itemSelect = document.getElementById('item_select');
+    const vendorSelect = document.getElementById('vendor_select');
+    const manualEntryBody = document.getElementById('manualEntryBody');
+    const manualRow = document.getElementById('manualRow');
+
+    // Toggle between item/vendor
+    function toggleSelects() {
+        const isItem = itemRadio.checked;
+        itemSelect.style.display = isItem ? 'inline-block' : 'none';
+        vendorSelect.style.display = isItem ? 'none' : 'inline-block';
+        itemSelect.disabled = !isItem;
+        vendorSelect.disabled = isItem;
+        manualEntryBody.innerHTML = isItem ? manualRow.outerHTML : '';
+    }
+
+    itemRadio.addEventListener('change', toggleSelects);
+    vendorRadio.addEventListener('change', toggleSelects);
+
+    // Fetch item details
+    itemSelect.addEventListener('change', () => {
+        const itemId = itemSelect.value;
+        if(!itemId) return;
+
+        fetch(`/get-item-details/?item_id=${itemId}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.error) return alert(data.error);
+
+                document.getElementById('name').value = data.name || '';
+                document.getElementById('company').value = data.company_name || '';
+                document.getElementById('price').value = data.item_price || '';
+                document.getElementById('pack').value = data.pack_size || '';
+                document.getElementById('stock').value = data.stock_balance || '';
+                document.getElementById('gst').value = data.gst || '';
+                document.getElementById('hsn').value = data.hsn || '';
+                document.getElementById('vendor_hidden').value = data.vendor?.id || '';
+                document.getElementById('company_hidden').value = data.company_name || '';
+            })
+            .catch(err => console.error(err));
+    });
+
+    // Fetch vendor items
+    vendorSelect.addEventListener('change', () => {
+        const vendorId = vendorSelect.value;
+        document.getElementById('vendor_hidden').value = vendorId;
+        if(!vendorId) { manualEntryBody.innerHTML = ''; return; }
+
+        fetch(`/get-vendor-details/?vendor_id=${vendorId}`)
+            .then(res => res.json())
+            .then(data => {
+                manualEntryBody.innerHTML = '';
+                data.items.forEach(item => {
+                    manualEntryBody.insertAdjacentHTML('beforeend', `
+                        <tr id="row_${item.item_id}">
+                            <td><input type="text" class="form-control" id="name_${item.item_id}" value="${item.name}" readonly></td>
+                            <td><input type="text" class="form-control" id="company_${item.item_id}" value="${item.company}" readonly></td>
+                            <td><input type="number" class="form-control" id="price_${item.item_id}" value="${item.price}" step="0.01" readonly></td>
+                            <td><input type="text" class="form-control" id="pack_${item.item_id}" value="${item.pack}" readonly></td>
+                            <td><input type="number" class="form-control" id="stock_${item.item_id}" value="${item.stock}" step="0.01" readonly></td>
+                            <td><input type="number" class="form-control" id="gst_${item.item_id}" value="${item.gst}" step="0.01" readonly></td>
+                            <td><input type="text" class="form-control" id="hsn_${item.item_id}" value="${item.hsn}" readonly></td>
+                            <td><input type="number" class="form-control" id="qty_${item.item_id}" step="0.01" placeholder="Qty"></td>
+                            <td><button type="button" class="btn btn-success btn-sm" onclick="addFromVendorRow('${item.item_id}')">Add</button></td>
+                        </tr>
+                    `);
+                });
+            });
+    });
+
+    toggleSelects();
+});
+
+// Add manual row
+function addManualToTable() {
+    const fields = ['name','company','price','pack','stock','gst','hsn','qty'];
+    const values = {};
+    fields.forEach(f => values[f] = document.getElementById(f)?.value || '');
+    const itemId = document.getElementById('item_select')?.value || `manual_${Date.now()}`;
+    if(!values.qty) return alert('Please enter quantity.');
+
+    const row = `
+        <tr>
+            <td>${values.name}<input type="hidden" name="name[]" value="${values.name}"></td>
+            <td>${values.company}<input type="hidden" name="company[]" value="${values.company}"></td>
+            <td>${values.price}<input type="hidden" name="price[]" value="${values.price}"></td>
+            <td>${values.pack}<input type="hidden" name="pack[]" value="${values.pack}"></td>
+            <td>${values.stock}<input type="hidden" name="stock[]" value="${values.stock}"></td>
+            <td>${values.gst}<input type="hidden" name="gst[]" value="${values.gst}"></td>
+            <td>${values.hsn}<input type="hidden" name="hsn[]" value="${values.hsn}"></td>
+            <td>${values.qty}<input type="hidden" name="qty[]" value="${values.qty}"><input type="hidden" name="item_id[]" value="${itemId}"></td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>
+        </tr>
+    `;
+    document.querySelector('#addedItemsTable tbody').insertAdjacentHTML('beforeend', row);
+    fields.forEach(f => { const el = document.getElementById(f); if(el) el.value=''; });
+}
+
+// Add vendor row
+function addFromVendorRow(itemId) {
+    const fields = ['name','company','price','pack','stock','gst','hsn','qty'];
+    const values = {};
+    fields.forEach(f => values[f] = document.getElementById(`${f}_${itemId}`)?.value || '');
+    const qty = document.getElementById(`qty_${itemId}`).value;
+    if(!qty) return alert('Please enter quantity.');
+
+    const row = `
+        <tr>
+            <td>${values.name}<input type="hidden" name="name[]" value="${values.name}"></td>
+            <td>${values.company}<input type="hidden" name="company[]" value="${values.company}"></td>
+            <td>${values.price}<input type="hidden" name="price[]" value="${values.price}"></td>
+            <td>${values.pack}<input type="hidden" name="pack[]" value="${values.pack}"></td>
+            <td>${values.stock}<input type="hidden" name="stock[]" value="${values.stock}"></td>
+            <td>${values.gst}<input type="hidden" name="gst[]" value="${values.gst}"></td>
+            <td>${values.hsn}<input type="hidden" name="hsn[]" value="${values.hsn}"></td>
+            <td>${qty}<input type="hidden" name="qty[]" value="${qty}"><input type="hidden" name="item_id[]" value="${itemId}"></td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>
+        </tr>
+    `;
+    document.querySelector('#addedItemsTable tbody').insertAdjacentHTML('beforeend', row);
+    document.getElementById(`row_${itemId}`)?.remove();
+}
+</script>

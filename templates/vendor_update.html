@@ -1,0 +1,392 @@
+{% include 'navbar3.html' %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Vendor</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body{
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body{
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+        }
+
+        /* MAIN CONTENT */
+        .main-content{
+            width: 100%;
+ 
+        }
+
+        /* FULL PAGE FORM */
+        .full-page-form{
+            width: 100%;
+            max-width: 100%;
+            padding: 30px;
+        }
+
+        /* HEADER */
+        .page-header{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #e5e7eb;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .page-header h2{
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-header p{
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* FORM */
+        form{
+            width: 100%;
+        }
+
+        .form-grid{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            width: 100%;
+        }
+
+        .form-group{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .col-span-3{
+            grid-column: span 3;
+        }
+
+        .form-group label{
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea{
+            width: 100%;
+            border: 1px solid #dbe3ef;
+            border-radius: 14px;
+            background: #f8fafc;
+            padding: 14px 15px;
+            font-size: 14px;
+            color: #0f172a;
+            transition: all 0.25s ease;
+            outline: none;
+        }
+
+        .form-group textarea{
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus{
+            border-color: #2563eb;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.10);
+        }
+
+        /* BUTTON AREA */
+        .button-area{
+            margin-top: 35px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .btn-modern{
+            border: none;
+            padding: 13px 24px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+
+        .btn-update{
+            background: linear-gradient(135deg,#2563eb,#1d4ed8);
+            color: white;
+            box-shadow: 0 10px 25px rgba(37,99,235,0.25);
+        }
+
+        .btn-update:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(37,99,235,0.35);
+        }
+
+        .btn-back{
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .btn-back:hover{
+            background: #bae6fd;
+        }
+
+        .btn-clear{
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .btn-clear:hover{
+            background: #e2e8f0;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:1200px){
+            .form-grid{
+                grid-template-columns: repeat(2,1fr);
+            }
+
+            .col-span-3{
+                grid-column: span 2;
+            }
+        }
+
+        @media(max-width:768px){
+
+            .main-content{
+                padding: 85px 12px 20px;
+            }
+
+            .full-page-form{
+                padding: 18px;
+            }
+
+            .page-header h2{
+                font-size: 22px;
+            }
+
+            .form-grid{
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .col-span-3{
+                grid-column: span 1;
+            }
+
+            .button-area{
+                flex-direction: column;
+            }
+
+            .btn-modern{
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="main-content">
+
+        <div class="full-page-form">
+    
+            <!-- HEADER -->
+            <div class="page-header">
+    
+                <div>
+                  <button type="button"
+                  class="btn-modern btn-back"
+                  onclick="window.location.href='{% url 'vendor_list' %}'">
+    
+              <i class="fa-solid fa-arrow-left"></i>
+              Back
+          </button>
+          <br>  <br>
+                    <h2>
+                        <i class="fa-solid fa-file-invoice"></i>
+                        Edit Vendor 
+                    </h2>
+    
+                    <p>
+                        Manage and update Vendor details
+                    </p>
+    
+                </div>
+    
+            </div>
+    
+        <!-- FORM -->
+        <form method="post"
+              enctype="multipart/form-data"
+              action="{% url 'vendor_update' vendor.id %}"
+              novalidate>
+
+            {% csrf_token %}
+
+            <div class="form-grid">
+
+                <!-- Vendor Name -->
+                <div class="form-group">
+                    <label for="name">Vendor Name</label>
+
+                    <input type="text"
+                           id="name"
+                           name="name"
+                           value="{{ vendor.name }}"
+                           required
+                           pattern="[A-Za-z\s]{3,}"
+                           title="Enter at least 3 letters">
+                </div>
+
+                <!-- Mobile Number -->
+                <div class="form-group">
+                    <label for="mobile_number">Mobile Number</label>
+
+                    <input type="text"
+                           id="mobile_number"
+                           name="mobile_number"
+                           value="{{ vendor.mobile_number }}"
+                           required
+                           pattern="\d{10}"
+                           title="Enter 10 digit number">
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           value="{{ vendor.email }}"
+                           required>
+                </div>
+
+                <!-- Address -->
+                <div class="form-group col-span-3">
+                    <label for="address">Address</label>
+
+                    <textarea id="address"
+                              name="address"
+                              rows="4"
+                              required>{{ vendor.address }}</textarea>
+                </div>
+
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="button-area">
+
+                <button type="submit" class="btn-modern btn-update">
+                    <i class="fa-solid fa-check"></i>
+                    Update Vendor
+                </button>
+            
+                <button type="reset" class="btn-modern btn-clear">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    Clear
+                </button>
+            
+            </div>
+            
+            <style>
+                .button-area{
+                    display: flex;
+                    justify-content: flex-end; /* Right side */
+                    align-items: center;
+                    gap: 12px;
+                    margin-top: 20px;
+                    flex-wrap: wrap;
+                }
+            
+                .btn-modern{
+                    border: none;
+                    padding: 10px 22px;
+                    border-radius: 10px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: 0.3s ease;
+                }
+            
+                .btn-update{
+                    background: #2563eb;
+                    color: #fff;
+                }
+            
+                .btn-update:hover{
+                    background: #1d4ed8;
+                    transform: translateY(-2px);
+                }
+            
+                .btn-clear{
+                    background: #e5e7eb;
+                    color: #111827;
+                }
+            
+                .btn-clear:hover{
+                    background: #d1d5db;
+                    transform: translateY(-2px);
+                }
+            
+                @media(max-width: 576px){
+                    .button-area{
+                        justify-content: center;
+                    }
+            
+                    .btn-modern{
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
+            </style>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

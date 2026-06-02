@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% include 'admin_navbar.html' %}
+
+<div class="main-content">
+
+    <div class="card">
+
+        <div class="card-header">
+            Add Billing Activity
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="mb-3">
+
+                    <label>Name</label>
+
+                    <input
+                        type="text"
+                        name="name"
+                        class="form-control"
+                        value="{{activity.name}}"
+                        required
+                    >
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label>Code</label>
+
+                    <input
+                        type="text"
+                        name="code"
+                        class="form-control"
+                        value="{{activity.code}}"
+                        required
+                    >
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label>Charge</label>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="charge"
+                        class="form-control"
+                        value="{{activity.charge}}"
+                        required
+                    >
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label>Description</label>
+
+                    <textarea
+                        name="description"
+                        class="form-control"
+                    >{{activity.description}}</textarea>
+
+                </div>
+
+                <button class="btn btn-success">
+
+                    Save Activity
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

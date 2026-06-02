@@ -1,0 +1,476 @@
+{% include 'admin_navbar.html' %}
+<body style="background-color: #edf0f6;">
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- SweetAlert2 CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+        <h4>Placed Orders</h4>
+
+        <form method="get" class="filters-container">
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label for="userFilter">Branch</label>
+                    <select name="user" id="userFilter" class="scrollable-select">
+                        <option value="">All Branches</option>
+                        {% for u in users %}
+                            <option value="{{ u.id }}" {% if request.GET.user == u.id|stringformat:"s" %}selected{% endif %}>
+                                {{ u.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                    <script>
+                        window.addEventListener('DOMContentLoaded', function () {
+                            const select = document.getElementById('userFilter');
+                            const selectedValue = select.value;
+                            const placeholder = select.options[0];
+                            const options = Array.from(select.options).slice(1);
+                            options.sort((a, b) => a.text.localeCompare(b.text));
+                            select.innerHTML = '';
+                            select.appendChild(placeholder);
+                            options.forEach(option => select.appendChild(option));
+                            select.value = selectedValue;
+                        });
+                    </script>
+</div>                    
+                <div class="filter-item">
+                    <label for="startDateFilter">Start Date</label>
+                    <input type="date" name="start_date" id="startDateFilter" value="{{ request.GET.start_date }}">
+                </div>
+
+                <div class="filter-item">
+                    <label for="endDateFilter">End Date</label>
+                    <input type="date" name="end_date" id="endDateFilter" value="{{ request.GET.end_date }}">
+                </div>
+
+                <div class="filter-item">
+                    <label for="vendorFilter">Vendor</label>
+                    <select name="vendor" id="vendorFilter" class="scrollable-select">
+                        <option value="">All Vendors</option>
+                        {% for vendor in vendors %}
+                            <option value="{{ vendor.name }}" {% if request.GET.vendor == vendor.name %}selected{% endif %}>
+                                {{ vendor.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                    <script>
+                        window.addEventListener('DOMContentLoaded', function () {
+                            const select = document.getElementById('vendorFilter');
+                    
+                            // Save the selected value
+                            const selectedValue = select.value;
+                    
+                            // Store the first placeholder option
+                            const placeholder = select.options[0];
+                    
+                            // Extract and sort the remaining options
+                            const options = Array.from(select.options).slice(1);
+                            options.sort((a, b) => a.text.localeCompare(b.text));
+                    
+                            // Clear and rebuild the select element
+                            select.innerHTML = '';
+                            select.appendChild(placeholder);
+                            options.forEach(option => select.appendChild(option));
+                    
+                            // Restore the selected value
+                            select.value = selectedValue;
+                        });
+                    </script>
+                    
+                </div>
+
+                <div class="filter-item">
+                    <label for="statusFilter">Status</label>
+                    <select name="status" id="statusFilter">
+                        <option value="">Select Status</option>
+                        <option value="Paid" {% if request.GET.status == 'Paid' %}selected{% endif %}>Paid</option>
+                        <option value="Pending" {% if request.GET.status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Cancelled" {% if request.GET.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label for="dateRangeFilter">Date Range</label>
+                    <select name="date_range" id="dateRangeFilter" onchange="this.form.submit()">
+                        <option value="" {% if not request.GET.date_range %}selected{% endif %}>Custom</option>
+                        <option value="daily" {% if request.GET.date_range == 'daily' %}selected{% endif %}>Daily</option>
+                        <option value="weekly" {% if request.GET.date_range == 'weekly' %}selected{% endif %}>Weekly</option>
+                        <option value="monthly" {% if request.GET.date_range == 'monthly' or not request.GET.date_range %}selected{% endif %}>Monthly</option>
+                    </select>
+                </div>
+
+                <div class="filter-buttons" style="width:100px">
+                    <button type="submit" class="filter-btn">Filter</button>
+                    <button type="button" class="filter-btn clear-btn" onclick="location.href='{% url 'placed_orders_all' %}'">Clear</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Bulk Delete Form and Controls -->
+        <!-- <form id="bulk-delete-form" method="post" action="{% url 'invoice_bulk_delete' %}">
+            {% csrf_token %}
+            <input type="hidden" name="selected_ids" id="selected_ids">
+
+            <div class="bulk-controls">
+                <div class="select-buttons">
+                    <button type="button" id="select-all-btn" class="btn primary-btn">Select All</button>
+                    <button type="button" id="unselect-all-btn" class="btn secondary-btn">Unselect All</button>
+                </div>
+
+                <button type="button" class="btn danger-btn" id="bulk-delete-btn">
+                    <i class="fas fa-trash-alt"></i> Delete Selected
+                </button>
+            </div>
+        </form> -->
+        <div class="table-responsive">
+            <table id="invoice-table" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all"></th>
+                        <th>Branch</th>
+                        <th>Vendor</th>
+                        <th>Created Date</th>
+                        <th>Invoice No</th>
+                        <th>Invoice Date</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Method</th>
+                        <th colspan="2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-body">
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td><input type="checkbox" class="select-item" value="{{ invoice.id }}"></td>
+                        <td>{{ invoice.user.username|default:"—" }}</td>
+                        <td>{{ invoice.vendor.name }}</td>
+                        <td>{{ invoice.created_at }}</td>
+                        <td>{{ invoice.invoice_number }}</td>
+                        <td>{% if invoice.dateField %}{{ invoice.dateField }}{% else %}Not Invoiced{% endif %}</td>
+                        <td>{{ invoice.total_amount }}</td>
+                        <td>{{ invoice.status|default:"—" }}</td>
+                        <td>{{ invoice.method|default:"—" }}</td>
+        
+                        <td>
+                            <a href="{% url 'preview_invoices' invoice.id %}" class="btn btn-sm btn-primary">
+                                Invoice
+                            </a>
+                        </td>
+        
+                        <!-- <td>
+                            <form action="{% url 'invoice_delete_admin' pk=invoice.pk %}" method="post" class="delete-form d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm delete-btn">Delete</button>
+                            </form>
+                        </td> -->
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+  
+</div>
+<style>
+    .table-responsive {
+  width: 100%;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Optional: add some padding or margin for better look */
+.table-responsive table {
+  min-width: 600px; /* or whatever width your table roughly needs */
+}
+
+</style>
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+
+    </div>
+
+    <style>
+        /* General Body and Main Content */
+        body {
+            background-color: #edf0f6;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .main-content {
+            padding: 18px;
+        }
+
+        /* Filters Container */
+        .filters-container {
+            display: flex;
+            justify-content: flex-end;
+            padding-right: 20px;
+            margin-bottom: 20px;
+        }
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+        }
+        .filter-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .filter-item select,
+        .filter-item input[type="date"],
+        .filter-buttons button {
+            width: 100%;
+            padding: 6px 10px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            grid-column: span 3;
+        }
+        .filter-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            padding: 10px 0;
+            border-radius: 4px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        .filter-btn:hover {
+            background-color: #2980b9;
+        }
+        .clear-btn {
+            background-color: grey;
+        }
+        .clear-btn:hover {
+            background-color: #555;
+        }
+
+        /* Scrollable Select */
+        .scrollable-select {
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        /* Bulk Delete Controls */
+        .bulk-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+        }
+        .select-buttons button {
+            margin-right: 8px;
+        }
+        .btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            user-select: none;
+            transition: background-color 0.3s ease;
+        }
+        .primary-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        .primary-btn:hover {
+            background-color: #2980b9;
+        }
+        .secondary-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        .secondary-btn:hover {
+            background-color: #5a6268;
+        }
+        .danger-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .danger-btn:hover {
+            background-color: #c0392b;
+        }
+        /* Smaller Buttons */
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.85rem;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 8px rgb(0 0 0 / 0.1);
+            font-size: 14px;
+        }
+        thead tr {
+            background-color: #f3f6f9;
+            border-bottom: 1px solid #d7dfe6;
+        }
+        thead th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #1f2937;
+            border-bottom: 1px solid #d7dfe6;
+        }
+        tbody tr {
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        tbody td {
+            padding: 12px 8px;
+            vertical-align: middle;
+            color: #4b5563;
+            white-space: nowrap;
+        }
+        tbody td input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Pagination */
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            user-select: none;
+        }
+        .pagination button {
+            border: none;
+            background-color: #3498db;
+            color: white;
+            padding: 6px 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .pagination button:hover {
+            background-color: #2980b9;
+        }
+        .pagination button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Delete form inline */
+        .d-inline {
+            display: inline;
+        }
+        .delete-btn {
+            font-size: 0.9rem;
+            padding: 4px 10px;
+        }
+    </style>
+
+    <!-- Optional JS for Select All/Unselect All -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectAllCheckbox = document.getElementById('select-all');
+            const checkboxes = document.querySelectorAll('.select-item');
+            const selectedIdsInput = document.getElementById('selected_ids');
+
+            // Select All Checkbox logic
+            selectAllCheckbox.addEventListener('change', (e) => {
+                checkboxes.forEach(cb => cb.checked = e.target.checked);
+                updateSelectedIds();
+            });
+
+            // Individual checkboxes update hidden input
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    updateSelectedIds();
+                    // If any checkbox unchecked, uncheck 'select-all'
+                    if (!cb.checked) selectAllCheckbox.checked = false;
+                    else if ([...checkboxes].every(c => c.checked)) selectAllCheckbox.checked = true;
+                });
+            });
+
+            // Update hidden input field with selected IDs
+            function updateSelectedIds() {
+                const selectedIds = [...checkboxes].filter(cb => cb.checked).map(cb => cb.value);
+                selectedIdsInput.value = selectedIds.join(',');
+            }
+
+            // Select All / Unselect All buttons
+            document.getElementById('select-all-btn').addEventListener('click', () => {
+                checkboxes.forEach(cb => cb.checked = true);
+                selectAllCheckbox.checked = true;
+                updateSelectedIds();
+            });
+            document.getElementById('unselect-all-btn').addEventListener('click', () => {
+                checkboxes.forEach(cb => cb.checked = false);
+                selectAllCheckbox.checked = false;
+                updateSelectedIds();
+            });
+
+            // Bulk delete confirmation
+            document.getElementById('bulk-delete-btn').addEventListener('click', () => {
+                const selected = selectedIdsInput.value.split(',').filter(id => id);
+                if (selected.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'No selection',
+                        text: 'Please select at least one invoice to delete.',
+                    });
+                    return;
+                }
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `You are about to delete ${selected.length} invoice(s). This action cannot be undone.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74c3c',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete them!',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('bulk-delete-form').submit();
+                    }
+                });
+            });
+
+            // Individual delete confirmation (optional enhancement)
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function(e){
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'This invoice will be deleted permanently!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, delete it!',
+                    }).then((result) => {
+                        if(result.isConfirmed){
+                            this.closest('form').submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>

@@ -1,0 +1,34 @@
+<h2>Invoice #{{ invoice.invoice_number }}</h2>
+<p>Date: {{ invoice.date }}</p>
+<p>Vendor: {{ invoice.vendor }}</p>
+<p>Status: {{ invoice.status }}</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Line Total</th>
+            <th>SGST</th>
+            <th>CGST</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for line in invoice.invoicelineitem_set.all %}
+        <tr>
+            <td>{{ line.purchase_order_line }}</td>
+            <td>{{ line.qty }}</td>
+            <td>{{ line.amount }}</td>
+            <td>{{ line.line_total }}</td>
+            <td>{{ line.sgst_amount }}</td>
+            <td>{{ line.cgst_amount }}</td>
+            <td>{{ line.total_amount }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p><strong>Total: ₹{{ invoice.total_amount }}</strong></p>
+<p><strong>In Words:</strong> {{ invoice.amount_in_words }}</p>

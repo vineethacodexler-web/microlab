@@ -1,0 +1,84 @@
+{% include 'admin_navbar.html' %}
+
+<div class="main-content">
+
+    <div class="d-flex justify-content-between mb-3">
+
+        <h4>Monthly Invoices</h4>
+
+        <a href="{% url 'generate_monthly_invoices' %}"
+           class="btn btn-success">
+
+            Generate Current Month Invoice
+
+        </a>
+
+    </div>
+
+    <table class="table table-bordered">
+
+        <thead>
+            <tr>
+                <th>Branch</th>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for invoice in invoices %}
+
+            <tr>
+
+                <td>
+                    {{ invoice.user.registration.First_name }}
+                </td>
+
+                <td>{{ invoice.month }}</td>
+
+                <td>{{ invoice.year }}</td>
+
+                <td>₹ {{ invoice.total_amount }}</td>
+
+                <td>
+
+                    {% if invoice.status == 'Paid' %}
+
+                        <span class="badge bg-success">
+                            Paid
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-danger">
+                            Pending
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a href="{% url 'invoice_payment' invoice.id %}"
+                       class="btn btn-primary btn-sm">
+
+                        Update Payment
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>

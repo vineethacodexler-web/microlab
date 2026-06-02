@@ -1,0 +1,283 @@
+{% include 'admin_navbar.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Users</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #edf0f6;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .container {
+            position: relative;
+            width: 90%;
+            margin: 50px auto;
+            background-color: #f2f2f2;
+            padding: 30px;
+            box-shadow: 5px 5px 10px #888888;
+        }
+
+        .button-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .button, .btn {
+            padding: 8px 14px;
+            font-size: 15px;
+            margin-left: 5px;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .search-container label,
+        .search-container input,
+        .search-container button {
+            margin-left: 10px;
+            font-size: 15px;
+        }
+
+        .popup-alert {
+            padding: 8px 12px;
+            font-size: 15px;
+        }
+
+        .card-title {
+            font-size: 16px;
+        }
+
+        input.datepicker {
+            font-size: 15px;
+            padding: 6px 10px;
+        }
+
+        .table-responsive {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<div class="main-content">
+    <section id="manage">
+        <div >
+            {% if messages %}
+
+              {% for message in messages %}
+                <div class="alert
+                            {% if 'success' in message.tags %}alert-success
+                            {% elif 'error' in message.tags %}alert-danger
+                            {% elif 'warning' in message.tags %}alert-warning
+                            {% elif 'info' in message.tags %}alert-info
+                            {% else %}alert-secondary
+                            {% endif %}
+                            alert-dismissible fade show auto-dismiss" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+              {% endfor %}
+            </div>
+
+            <script>
+              // Automatically dismiss alerts after 3 seconds
+              setTimeout(function() {
+                const alerts = document.querySelectorAll('.auto-dismiss');
+                alerts.forEach(function(alert) {
+                  const bsAlert = new bootstrap.Alert(alert);
+                  bsAlert.close();
+                });
+              }, 3000); // 3000 milliseconds = 3 seconds
+            </script>
+          {% endif %}
+
+
+            <h2>User Management</h2>
+
+            <div class="search-container">
+                <label for="search">Search:</label>
+                <input type="text" id="search" placeholder="Enter search query">
+                <button class="btn btn-primary" onclick="filterBySearch()">Search</button>
+            </div>
+
+            <div class="filters mb-2">
+                <label for="fromDate">From:</label>
+                <input type="text" id="fromDate" class="datepicker" placeholder="From Date">
+                <label for="toDate">To:</label>
+                <input type="text" id="toDate" class="datepicker" placeholder="To Date">
+                <button class="btn btn-primary" onclick="filterTable()">Search by Date</button>
+                <button class="btn btn-secondary" onclick="showAllRows()">Show All</button>
+                <button class="btn btn-success" onclick="exportToExcel()">Export to Excel</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Sl No</th>
+                            <th>Name</th>
+                            <th>Mobile Number</th>
+                            <th>Email</th>
+                            <th>Login Id</th>
+                            <th>Password</th>
+                            <th>Registration Date</th>
+                            <th>Edit Allowed</th>
+                            <th colspan="2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in all_users %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ user.First_name }}</td>
+                            <td>{{ user.Mobile_Number }}</td>
+                            <td>{{ user.Email }}</td>
+                            <td>{{ user.user }}</td>
+                            <td>{{ user.Password }}</td>
+                            <td>{{ user.Registration_date }}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input edit-toggle"
+                                           type="checkbox"
+                                           data-id="{{ user.id }}"
+                                           {% if user.edit_allowed == "True" %}checked{% endif %}>
+                                </div>
+                            </td>
+                           <td>
+                                <a href="{% url 'edit_employee' id=user.id %}" class="btn btn-warning">Edit</a>
+                            </td>
+                            <td>
+                                <a href="{% url 'del_employee' id=user.id %}" class="btn btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </section>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".datepicker").datepicker({ dateFormat: 'M. dd, yy' });
+    });
+
+    function exportToExcel() {
+        var filteredData = [];
+        $("#dataTable tbody tr:visible").each(function () {
+            var rowData = [];
+            $(this).find("td").each(function () {
+                rowData.push($(this).text());
+            });
+            filteredData.push(rowData);
+        });
+
+        var wb = XLSX.utils.book_new();
+        wb.SheetNames.push("Filtered Data");
+        var ws = XLSX.utils.aoa_to_sheet(filteredData);
+        wb.Sheets["Filtered Data"] = ws;
+        var wbout = XLSX.write(wb, { bookType: "xlsx", type: "binary" });
+
+        function s2ab(s) {
+            var buf = new ArrayBuffer(s.length);
+            var view = new Uint8Array(buf);
+            for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xff;
+            return buf;
+        }
+
+        saveAs(new Blob([s2ab(wbout)], { type: "application/octet-stream" }), "Users.xlsx");
+    }
+
+    function filterBySearch() {
+        var query = $("#search").val().toLowerCase();
+        $("#dataTable tbody tr").each(function () {
+            var found = false;
+            $(this).find("td").each(function () {
+                if ($(this).text().toLowerCase().includes(query)) {
+                    found = true;
+                    return false;
+                }
+            });
+            $(this).toggle(found);
+        });
+    }
+
+    function filterTable() {
+        var fromDate = new Date($("#fromDate").val());
+        var toDate = new Date($("#toDate").val());
+
+        $("#dataTable tbody tr").each(function () {
+            var dateText = $(this).find("td:eq(6)").text();
+            var rowDate = new Date(dateText);
+            if (rowDate >= fromDate && rowDate <= toDate) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
+    function showAllRows() {
+        $("#dataTable tbody tr").show();
+    }
+</script>
+
+<script>
+document.querySelectorAll('.edit-toggle').forEach(toggle => {
+    toggle.addEventListener('change', function() {
+        const userId = this.dataset.id;
+        const status = this.checked;
+
+        fetch(`/toggle-edit/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({
+                edit_allowed: status
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("Updated:", data);
+        })
+        .catch(err => {
+            alert("Error updating");
+        });
+    });
+});
+
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+</script>
+</body>
+</html>

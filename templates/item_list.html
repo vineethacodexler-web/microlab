@@ -1,0 +1,1073 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <title>Items</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f4f7fb;
+      font-family: "Segoe UI", sans-serif;
+      color: #1f2937;
+    }
+
+    .item-wrapper {
+      padding: 0px;
+    }
+
+    .item-card {
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+      border: 1px solid #eef2f7;
+      overflow: hidden;
+    }
+
+    .item-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid #eef2f7;
+      background: linear-gradient(135deg, #ffffff, #f8fbff);
+    }
+
+    .item-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0;
+    }
+
+    .filter-card {
+      background: #fff;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .form-label {
+      font-size: 10px;
+      margin-bottom: 2px !important;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .custom-input {
+      height: 28px !important;
+      min-height: 28px !important;
+      font-size: 11px !important;
+      border-radius: 6px !important;
+      padding: 4px 8px !important;
+    }
+
+    .custom-select {
+      height: 28px !important;
+      min-height: 28px !important;
+      font-size: 11px !important;
+      border-radius: 6px !important;
+      padding: 2px 22px 2px 8px !important;
+      line-height: 1.1 !important;
+    }
+
+    .entries-box {
+      width: 78px;
+    }
+
+    .sort-box {
+      width: 115px;
+    }
+
+    .date-box {
+      width: 120px;
+    }
+
+    .filter-btn {
+      height: 28px;
+      min-height: 28px;
+      padding: 3px 10px;
+      font-size: 11px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .count-badge {
+      background: #f1f5f9;
+      color: #334155;
+      border-radius: 30px;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .btn {
+      border-radius: 11px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 12px;
+    }
+
+    .btn-sm {
+      padding: 7px 11px;
+      font-size: 12px;
+    }
+
+    .table-area {
+      padding: 18px 20px 20px;
+    }
+
+    .table-responsive {
+      border-radius: 15px;
+      border: 1px solid #eef2f7;
+      overflow-x: auto;
+    }
+
+    .table {
+      margin-bottom: 0;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      vertical-align: middle !important;
+      white-space: nowrap;
+      font-size: 12px;
+            font-weight: bold;
+    }
+
+    .table thead th {
+      background: #eff6ff;
+      color: #1e3a8a;
+ 
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      font-size: 12px;
+            font-weight: bold;
+      border-bottom: 1px solid #dbeafe;
+      padding: 12px 10px;
+    }
+
+    .table tbody td {
+      padding: 11px 10px;
+      color: #334155;
+      border-color: #eef2f7;
+      font-size: 12px;
+            font-weight: bold;
+    }
+
+    .table tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    .item-name {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .scroll-cell {
+      max-width: 180px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: thin;
+    }
+
+    .action-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      transition: 0.2s ease;
+      text-decoration: none;
+    }
+
+    .edit-btn {
+      color: #0d6efd;
+      background: #eaf2ff;
+    }
+
+    .edit-btn:hover {
+      background: #0d6efd;
+      color: #ffffff;
+    }
+
+    .delete-btn {
+      color: #dc3545;
+      background: #fff1f2;
+    }
+
+    .delete-btn:hover {
+      background: #dc3545;
+      color: #ffffff;
+    }
+
+    .pagination .page-link {
+      border-radius: 9px;
+      margin: 0 2px;
+      font-size: 13px;
+      color: #0d6efd;
+    }
+
+    .pagination .active .page-link {
+      color: #ffffff;
+    }
+
+    .modal-content {
+      border: none;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .modal-title {
+      font-weight: 700;
+    }
+
+    .highlight-row td {
+      background-color: #fff3cd !important;
+      color: #000 !important;
+      animation: blinkBg 0.45s ease-in-out 4;
+    }
+
+    @keyframes blinkBg {
+      0% { background-color: #fff3cd; }
+      50% { background-color: #d1e7dd; }
+      100% { background-color: #fff3cd; }
+    }
+
+    .disabled {
+      pointer-events: none;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      .item-wrapper {
+        padding: 12px;
+      }
+
+      .item-header,
+      .filter-card,
+      .table-area {
+        padding: 14px;
+      }
+
+      .btn,
+      .form-control,
+      .form-select {
+        width: 100%;
+      }
+
+      .mobile-full {
+        width: 100%;
+      }
+
+      .entries-box,
+      .sort-box,
+      .date-box {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+{% include 'navbar3.html' %}
+
+<div class="container-fluid item-wrapper">
+
+  <div class="item-card">
+
+    <div class="item-header">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h5 class="item-title">Items</h5>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <form id="excelForm" enctype="multipart/form-data" class="m-0">
+            {% csrf_token %}
+            <input type="file" name="excel_file" id="excel_file" style="display:none;" required>
+
+            <button type="button" class="btn btn-success btn-sm" onclick="document.getElementById('excel_file').click();">
+              <i class="bi bi-file-earmark-excel"></i> Import Excel
+            </button>
+          </form>
+
+          <button type="button" class="btn btn-outline-success btn-sm" onclick="exportItemsToExcel()">
+            <i class="bi bi-file-earmark-excel"></i> Export Excel
+          </button>
+
+          <button type="button" class="btn btn-outline-dark btn-sm" onclick="exportItemsToPDF()">
+            <i class="bi bi-file-earmark-pdf"></i> Export PDF
+          </button>
+
+          <button type="button" class="btn btn-outline-danger btn-sm" onclick="bulkDeleteItems()">
+            <i class="bi bi-trash"></i> Delete Selected
+          </button>
+
+          <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addItemModal">
+            <i class="bi bi-plus-circle"></i> New Item
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-card py-2 px-3">
+      <form method="get" id="filterForm">
+
+        <div class="row gx-2 gy-1 align-items-end">
+
+          <div class="col-lg-3 col-md-4 col-12">
+            <label class="form-label small fw-semibold mb-1">Search</label>
+            <input
+              type="text"
+              name="search"
+              value="{{ search }}"
+              class="form-control form-control-sm shadow-none custom-input"
+              placeholder="Search items..."
+            >
+          </div>
+
+          <div class="col-auto entries-box">
+            <label class="form-label small fw-semibold mb-1">Entries</label>
+            <select
+              name="per_page"
+              class="form-select form-select-sm shadow-none custom-select"
+              onchange="this.form.submit()"
+            >
+              {% for entry in entries_options %}
+                <option value="{{ entry }}" {% if per_page == entry %}selected{% endif %}>
+                  {% if entry == "all" %}
+                    All
+                  {% else %}
+                    {{ entry }}
+                  {% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-auto sort-box">
+            <label class="form-label small fw-semibold mb-1">Sort By</label>
+            <select
+              name="sort_by"
+              class="form-select form-select-sm shadow-none custom-select"
+              onchange="this.form.submit()"
+            >
+              <option value="-id" {% if sort_by == "-id" %}selected{% endif %}>Newest</option>
+              <option value="oldest" {% if sort_by == "oldest" %}selected{% endif %}>Oldest</option>
+              <option value="name_asc" {% if sort_by == "name_asc" %}selected{% endif %}>A - Z</option>
+              <option value="name_desc" {% if sort_by == "name_desc" %}selected{% endif %}>Z - A</option>
+            </select>
+          </div>
+
+          <div class="col-auto date-box">
+            <label class="form-label small fw-semibold mb-1">Date</label>
+            <select
+              name="date_filter"
+              id="date_filter"
+              class="form-select form-select-sm shadow-none custom-select"
+              onchange="toggleCustomDate();"
+            >
+              <option value="" {% if date_filter == "" %}selected{% endif %}>All</option>
+              <option value="daily" {% if date_filter == "daily" %}selected{% endif %}>Today</option>
+              <option value="weekly" {% if date_filter == "weekly" %}selected{% endif %}>This Week</option>
+              <option value="monthly" {% if date_filter == "monthly" %}selected{% endif %}>This Month</option>
+              <option value="yearly" {% if date_filter == "yearly" %}selected{% endif %}>This Year</option>
+              <option value="custom" {% if date_filter == "custom" %}selected{% endif %}>Custom</option>
+            </select>
+          </div>
+
+          <div class="col-auto date-box custom-date-box" style="display:none;">
+            <label class="form-label small fw-semibold mb-1">Start</label>
+            <input
+              type="date"
+              name="start_date"
+              value="{{ start_date }}"
+              class="form-control form-control-sm shadow-none custom-input"
+            >
+          </div>
+
+          <div class="col-auto date-box custom-date-box" style="display:none;">
+            <label class="form-label small fw-semibold mb-1">End</label>
+            <input
+              type="date"
+              name="end_date"
+              value="{{ end_date }}"
+              class="form-control form-control-sm shadow-none custom-input"
+            >
+          </div>
+
+          <div class="col">
+            <div class="d-flex gap-1 flex-wrap align-items-center mt-md-0 mt-1">
+              <button type="submit" class="btn btn-primary btn-sm filter-btn">
+                <i class="bi bi-funnel"></i> Apply Filter
+              </button>
+
+              <a href="{% url 'item_list' %}" class="btn btn-outline-secondary btn-sm filter-btn">
+                <i class="bi bi-arrow-clockwise"></i> Clear Filter
+              </a>
+
+              <span class="count-badge small">
+                {{ showing_count }}/{{ total_count }}
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div>
+
+    <div class="table-area">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="itemTable">
+          <thead>
+            <tr>
+              <th class="text-center">
+                <input type="checkbox" id="selectAllItems" class="form-check-input">
+              </th>
+              <th>Sl</th>
+              <th>Item Name</th>
+              <th>Company Name</th>
+              <th>HSN</th>
+              <th>Vendor</th>
+              <th>Pack Size</th>
+              <th>GST</th>
+              <th>Item Price</th>
+              <th>Stock</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for item in items %}
+            <tr data-item-id="{{ item.id }}">
+              <td class="text-center">
+                <input type="checkbox" class="itemCheckbox form-check-input" value="{{ item.id }}">
+              </td>
+
+              <td>
+                {% if page_obj %}
+                  {{ page_obj.start_index|add:forloop.counter0 }}
+                {% else %}
+                  {{ forloop.counter }}
+                {% endif %}
+              </td>
+
+              <td>
+                <span class="item-name">{{ item.name }}</span>
+              </td>
+
+              <td>
+                <div class="scroll-cell">{{ item.company_name }}</div>
+              </td>
+
+              <td>{{ item.hsn }}</td>
+
+              <td class="vendor-cell">
+                <div class="vendor-scroll">
+                  <i class="bi bi-person-badge text-primary me-1"></i>
+                  <span>{{ item.vendor.name }}</span>
+                </div>
+              </td>
+              
+              <style>
+                .vendor-cell {
+                  max-width: 180px;
+                  white-space: nowrap;
+                }
+              
+                .vendor-scroll {
+                  display: flex;
+                  align-items: center;
+                  overflow-x: auto;
+                  overflow-y: hidden;
+                  white-space: nowrap;
+                  scrollbar-width: thin;
+                  scrollbar-color: #cbd5e1 transparent;
+                  padding-bottom: 2px;
+                }
+              
+                .vendor-scroll::-webkit-scrollbar {
+                  height: 4px;
+                }
+              
+                .vendor-scroll::-webkit-scrollbar-thumb {
+                  background: #cbd5e1;
+                  border-radius: 10px;
+                }
+              
+                .vendor-scroll span {
+                  display: inline-block;
+                  min-width: max-content;
+                  font-size: 13px;
+                }
+              </style>
+
+              <td>{{ item.pack_size }}</td>
+
+              <td>{{ item.gst }}</td>
+
+              <td>
+                <i class="bi bi-currency-rupee text-success me-1"></i>
+                {{ item.item_price }}
+              </td>
+
+              <td>
+                {% if item.stock_balance|stringformat:"s" == "0" %}
+                  <span class="badge bg-danger">0</span>
+                {% else %}
+                  <span class="badge bg-success" style="   font-size: 12px;
+                  font-weight: bold;">{{ item.stock_balance }}</span>
+                {% endif %}
+              </td>
+
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-2">
+                  <a href="{% url 'item_update' item.id %}" class="action-btn edit-btn edit-link" title="Edit Item">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+
+                  <button type="button" class="btn btn-outline-danger btn-sm" onclick="bulkDeleteItems()">
+                    <i class="bi bi-trash"></i> 
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="11" class="text-center py-4 text-muted">
+                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                No items found
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if page_obj %}
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+        <div class="text-muted small">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </div>
+
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1&{{ query_params }}">First</a>
+              </li>
+
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ query_params }}">Previous</a>
+              </li>
+            {% endif %}
+
+            <li class="page-item active">
+              <span class="page-link">{{ page_obj.number }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ query_params }}">Next</a>
+              </li>
+
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&{{ query_params }}">Last</a>
+              </li>
+            {% endif %}
+
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content shadow-sm">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-plus-circle me-1"></i> Add New Item
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="post" enctype="multipart/form-data" action="{% url 'item_create' %}">
+        {% csrf_token %}
+
+        <div class="modal-body row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Item Name</label>
+            <input type="text" class="form-control" name="name" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Company Name</label>
+            <input type="text" class="form-control" name="company_name" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">HSN</label>
+            <input type="text" class="form-control" name="hsn" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Vendor</label>
+            <select class="form-select" name="vendor" required>
+              {% for vendor in vendors %}
+                <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Pack (ml)</label>
+            <input type="text" class="form-control" name="pack_size" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Item Price</label>
+            <input type="number" step="0.01" class="form-control" name="item_price" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">GST</label>
+            <input type="text" class="form-control" name="gst" value="0" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Quantity</label>
+            <input type="text" class="form-control" name="stock_balance" required>
+          </div>
+        </div>
+
+        <div class="modal-footer mt-3">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Save Item
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="importProgressModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-sm">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-cloud-arrow-up me-1"></i> Importing Items...
+        </h5>
+      </div>
+
+      <div class="modal-body">
+        <div class="progress" style="height:25px;">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" id="importProgress" style="width:0%">0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+let allSelected = false;
+
+document.addEventListener("DOMContentLoaded", function () {
+  toggleCustomDate();
+
+  const selectAll = document.getElementById("selectAllItems");
+
+  if (selectAll) {
+    selectAll.addEventListener("change", function () {
+      allSelected = this.checked;
+      document.querySelectorAll(".itemCheckbox").forEach(function (checkbox) {
+        checkbox.checked = allSelected;
+      });
+    });
+  }
+
+  document.querySelectorAll(".itemCheckbox").forEach(function (checkbox) {
+    checkbox.addEventListener("change", function () {
+      if (!this.checked) {
+        allSelected = false;
+        document.getElementById("selectAllItems").checked = false;
+      }
+    });
+  });
+
+  const highlightId = new URLSearchParams(window.location.search).get("highlight");
+
+  if (highlightId) {
+    const highlightedRow = document.querySelector('tr[data-item-id="' + highlightId + '"]');
+
+    if (highlightedRow) {
+      highlightedRow.classList.add("highlight-row");
+
+      setTimeout(function () {
+        highlightedRow.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }, 300);
+
+      setTimeout(function () {
+        highlightedRow.classList.remove("highlight-row");
+      }, 2000);
+    }
+  }
+
+  const excelFile = document.getElementById("excel_file");
+
+  if (excelFile) {
+    excelFile.addEventListener("change", function () {
+      let fileInput = this.files[0];
+
+      if (!fileInput) return;
+
+      let formData = new FormData();
+      formData.append("excel_file", fileInput);
+      formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+      let progressModal = new bootstrap.Modal(document.getElementById("importProgressModal"));
+      progressModal.show();
+
+      $("#importProgress").css("width", "0%").text("0%");
+
+      $.ajax({
+        url: "{% url 'item_import_excel' %}",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+
+        xhr: function () {
+          let xhr = new window.XMLHttpRequest();
+
+          xhr.upload.addEventListener("progress", function (evt) {
+            if (evt.lengthComputable) {
+              let percentComplete = Math.round((evt.loaded / evt.total) * 100);
+              $("#importProgress").css("width", percentComplete + "%").text(percentComplete + "%");
+            }
+          }, false);
+
+          return xhr;
+        },
+
+        success: function () {
+          $("#importProgress").css("width", "100%").text("100%");
+
+          setTimeout(function () {
+            progressModal.hide();
+
+            Swal.fire({
+              title: "Success",
+              text: "Items imported successfully!",
+              icon: "success",
+              timer: 3000,
+              showConfirmButton: false
+            }).then(function () {
+              location.reload();
+            });
+          }, 500);
+        },
+
+        error: function () {
+          progressModal.hide();
+          Swal.fire("Error", "Something went wrong during import", "error");
+        }
+      });
+    });
+  }
+});
+
+function toggleCustomDate() {
+  const dateFilter = document.getElementById("date_filter");
+  const customBoxes = document.querySelectorAll(".custom-date-box");
+
+  if (!dateFilter) return;
+
+  customBoxes.forEach(function (box) {
+    if (dateFilter.value === "custom") {
+      box.style.display = "block";
+    } else {
+      box.style.display = "none";
+    }
+  });
+}
+
+function bulkDeleteItems() {
+  const selectedCheckboxes = Array.from(document.querySelectorAll(".itemCheckbox:checked"));
+  const selectedIds = selectedCheckboxes.map(function (checkbox) {
+    return checkbox.value;
+  });
+
+  if (!selectedIds.length) {
+    return Swal.fire("No items selected", "", "warning");
+  }
+
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This will delete all selected items!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, delete all!",
+    cancelButtonText: "Cancel"
+  }).then(function (result) {
+    if (!result.isConfirmed) return;
+
+    fetch("{% url 'item_bulk_delete' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({
+        ids: selectedIds
+      })
+    })
+    .then(function (res) {
+      if (res.ok) {
+        location.reload();
+      } else {
+        Swal.fire("Error deleting items", "", "error");
+      }
+    })
+    .catch(function () {
+      Swal.fire("Something went wrong", "", "error");
+    });
+  });
+}
+
+document.addEventListener("click", function (e) {
+  const deleteBtn = e.target.closest(".delete-link");
+
+  if (deleteBtn) {
+    e.preventDefault();
+
+    const form = deleteBtn.closest("form");
+
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#0d6efd",
+      cancelButtonColor: "#dc3545",
+      confirmButtonText: "Yes, delete it!"
+    }).then(function (result) {
+      if (result.isConfirmed) {
+        form.submit();
+      }
+    });
+  }
+});
+
+function getRowsForExport() {
+  const selectedCheckboxes = Array.from(document.querySelectorAll(".itemCheckbox:checked"));
+
+  let rows;
+
+  if (selectedCheckboxes.length) {
+    rows = selectedCheckboxes.map(function (checkbox) {
+      return checkbox.closest("tr");
+    });
+  } else {
+    rows = Array.from(document.querySelectorAll("#itemTable tbody tr")).filter(function (row) {
+      return row.querySelectorAll("td").length > 1;
+    });
+  }
+
+  return rows;
+}
+
+function exportItemsToExcel() {
+  const rowsToExport = getRowsForExport();
+
+  if (!rowsToExport.length) {
+    return Swal.fire("No data found", "", "warning");
+  }
+
+  const data = [["Sl", "Item Name", "Company Name", "HSN", "Vendor", "Pack Size", "GST", "Item Price", "Stock"]];
+
+  rowsToExport.forEach(function (row) {
+    const cells = row.querySelectorAll("td");
+
+    data.push([
+      cells[1].innerText.trim(),
+      cells[2].innerText.trim(),
+      cells[3].innerText.trim(),
+      cells[4].innerText.trim(),
+      cells[5].innerText.trim(),
+      cells[6].innerText.trim(),
+      cells[7].innerText.trim(),
+      cells[8].innerText.trim(),
+      cells[9].innerText.trim()
+    ]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Items");
+  XLSX.writeFile(wb, "items.xlsx");
+
+  Swal.fire({
+    title: "Export Complete",
+    text: `${rowsToExport.length} items exported to Excel`,
+    icon: "success",
+    timer: 3000,
+    showConfirmButton: false
+  });
+}
+
+function exportItemsToPDF() {
+  const rowsToExport = getRowsForExport();
+
+  if (!rowsToExport.length) {
+    return Swal.fire("No data found", "", "warning");
+  }
+
+  const tableData = [];
+
+  rowsToExport.forEach(function (row) {
+    const cells = row.querySelectorAll("td");
+
+    tableData.push([
+      cells[1].innerText.trim(),
+      cells[2].innerText.trim(),
+      cells[3].innerText.trim(),
+      cells[4].innerText.trim(),
+      cells[5].innerText.trim(),
+      cells[6].innerText.trim(),
+      cells[7].innerText.trim(),
+      cells[8].innerText.trim(),
+      cells[9].innerText.trim()
+    ]);
+  });
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("l", "pt", "a4");
+
+  doc.text("Items List", 40, 30);
+
+  doc.autoTable({
+    head: [["Sl", "Item Name", "Company Name", "HSN", "Vendor", "Pack Size", "GST", "Item Price", "Stock"]],
+    body: tableData,
+    startY: 50,
+    styles: {
+      fontSize: 9
+    },
+    theme: "grid"
+  });
+
+  doc.save("items.pdf");
+
+  Swal.fire({
+    title: "Export Complete",
+    text: `${rowsToExport.length} items exported to PDF`,
+    icon: "success",
+    timer: 3000,
+    showConfirmButton: false
+  });
+}
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const selectAll = document.getElementById("selectAllItems");
+  
+    if (selectAll) {
+      selectAll.addEventListener("change", function () {
+        document.querySelectorAll(".itemCheckbox").forEach(function (checkbox) {
+          checkbox.checked = selectAll.checked;
+        });
+      });
+    }
+  
+    document.querySelectorAll(".itemCheckbox").forEach(function (checkbox) {
+      checkbox.addEventListener("change", function () {
+        const total = document.querySelectorAll(".itemCheckbox").length;
+        const checked = document.querySelectorAll(".itemCheckbox:checked").length;
+  
+        if (selectAll) {
+          selectAll.checked = total > 0 && total === checked;
+        }
+      });
+    });
+  });
+  
+  function bulkDeleteItems() {
+    const selectedIds = Array.from(document.querySelectorAll(".itemCheckbox:checked"))
+      .map(function (checkbox) {
+        return checkbox.value;
+      });
+  
+    if (!selectedIds.length) {
+      return Swal.fire("No items selected", "Please select at least one item.", "warning");
+    }
+  
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This will delete all selected items!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, delete all",
+      cancelButtonText: "Cancel"
+    }).then(function (result) {
+      if (!result.isConfirmed) return;
+  
+      fetch("{% url 'item_bulk_delete' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+          ids: selectedIds
+        })
+      })
+      .then(function (response) {
+        return response.json().then(function (data) {
+          if (!response.ok || !data.success) {
+            throw new Error(data.message || "Delete failed");
+          }
+          return data;
+        });
+      })
+      .then(function (data) {
+        Swal.fire({
+          title: "Deleted!",
+          text:" item(s) deleted successfully.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false
+        }).then(function () {
+          location.reload();
+        });
+      })
+      .catch(function (error) {
+        Swal.fire("Error", error.message, "error");
+      });
+    });
+  }
+  </script>
+</body>
+</html>

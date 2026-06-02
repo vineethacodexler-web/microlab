@@ -1,0 +1,38 @@
+
+<div class="container mt-4">
+    <h2>All Invoices</h2>
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Invoice No</th>
+                <th>PO ID</th>
+                <th>Vendor</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Total Amount</th>
+                <th>Created By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invoice in invoices %}
+            <tr>
+                <td>{{ invoice.invoice_number }}</td>
+                <td>{{ invoice.purchase_order.id }}</td>
+                <td>{{ invoice.vendor.name }}</td>
+                <td>{{ invoice.status }}</td>
+                <td>{{ invoice.date }}</td>
+                <td>₹{{ invoice.total_amount }}</td>
+                <td>{{ invoice.user.username }}</td>
+                <td>
+                    <a href="{% url 'invoice_detail' invoice.pk %}" class="btn btn-sm btn-primary">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">No invoices found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

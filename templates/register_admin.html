@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrator Registration</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      
+    }
+    .container {
+      max-width: 700px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .btn-primary {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .error-text {
+      color: red;
+    }
+    .footer-text {
+      font-size: 16px;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo img {
+      max-width: 60px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+
+  <h2 class="text-center mb-4">Administrator Registration</h2>
+
+  <div class="alert alert-danger d-none" id="errorMessages">
+    <ul id="errorList"></ul>
+  </div>
+
+  <form method="post" action="{% url 'adminn' %}" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    <div class="row g-3" >
+      <div class="col-md-6" >
+        <div class="form-group">
+          <label for="firstName" class="form-label">First Name</label>
+          <input type="text" name="first_name" class="form-control" pattern="[A-Za-z]+" title="Please enter alphabets only" required>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="lastName" class="form-label">Last Name</label>
+          <input type="text" name="last_name" class="form-control" pattern="[A-Za-z]+" title="Please enter alphabets only" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-3">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="userName" class="form-label">User Name</label>
+          <input type="text" name="user_name" class="form-control" pattern="[A-Za-z]+" title="Please enter alphabets only" required>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="mobileNumber" class="form-label">Contact Number</label>
+          <input type="text" name="mobile_number" class="form-control" pattern="^(?!000)[0-9]{10}$" title="Please enter a valid 10-digit mobile number" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-3">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-control" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="gstNum" class="form-label">GSTIN</label>
+          <input type="text" name="gst_num" class="form-control" >
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group mt-3">
+      <label for="address" class="form-label">Address</label>
+      <input type="text" name="address" class="form-control" required>
+    </div>
+
+    <div class="row g-3 mt-3">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" name="psw" class="form-control" id="newPassword" oninput="validatePassword()" pattern="^(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}|:;<>,.?[\]\-]).{8,}$" title="Password must include uppercase, lowercase, digit, and special character." required>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="rePassword" class="form-label">Re-enter Password</label>
+          <input type="password" name="psw" class="form-control" id="renewPassword" oninput="validatePassword()" required>
+          <small id="passwordHelp" class="form-text"></small>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group mt-3">
+      <label for="photo" class="form-label">Upload Photo</label>
+      <input type="file" name="photo" class="form-control" required>
+    </div>
+
+    <div class="form-check mt-3">
+      <input class="form-check-input" name="useragreement" type="checkbox" value="True" id="acceptTerms" required>
+      <label class="form-check-label" for="acceptTerms">
+        I agree to the <a href="#">terms and conditions</a>
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-4" id="changePasswordBtn" disabled>Save Details</button>
+  </form>
+
+  <div class="footer-text text-center mt-4">
+    <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+  </div>
+</div>
+
+<script>
+  function validatePassword() {
+    var newPassword = document.getElementById("newPassword").value;
+    var renewPassword = document.getElementById("renewPassword").value;
+    var passwordHelp = document.getElementById("passwordHelp");
+    var changePasswordBtn = document.getElementById("changePasswordBtn");
+
+    if (newPassword === renewPassword) {
+      passwordHelp.textContent = "Passwords match!";
+      passwordHelp.style.color = "green";
+      changePasswordBtn.disabled = false; 
+    } else {
+      passwordHelp.textContent = "Passwords do not match.";
+      passwordHelp.style.color = "red";
+      changePasswordBtn.disabled = true; 
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

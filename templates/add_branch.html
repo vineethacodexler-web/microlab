@@ -1,0 +1,50 @@
+<div class="app-main__outer">
+    <div class="app-main__inner p-4"> <!-- Added padding here -->
+        <div class="row g-4"> <!-- Added gutter for spacing between cards -->
+        <form method="POST" action="{% url 'add_branch' %}">
+    {% csrf_token %}
+    <label for="branch_name">Branch Name:</label>
+    <input type="text" name="branch_name" id="branch_name" required>
+    
+    <label for="location">Location:</label>
+    <input type="text" name="location" id="location" required>
+    
+    <button type="submit">Add Branch</button>
+</form>
+
+<h3>Select Item or Vendor to View Companies</h3>
+<form id="select-form">
+    <select name="selection_type" id="selection_type">
+        <option value="item">Item</option>
+        <option value="vendor">Vendor</option>
+    </select>
+    <select name="selection_id" id="selection_id">
+        <!-- Dynamically populate with items or vendors -->
+    </select>
+
+    <button type="button" onclick="getCompanies()">Show Companies</button>
+</form>
+
+<div id="companies-list"></div>
+
+<script>
+    // You can populate the items/vendors here dynamically via AJAX or form submissions.
+    function getCompanies() {
+        var selectedType = document.getElementById('selection_type').value;
+        var selectedId = document.getElementById('selection_id').value;
+
+        fetch(`/get_companies/?selected_type=${selectedType}&selected_id=${selectedId}`)
+            .then(response => response.json())
+            .then(data => {
+                var companiesList = data.companies;
+                var output = "<ul>";
+                companiesList.forEach(function(company) {
+                    output += `<li>${company.company_name} - Price: ${company.item_price}, Pack Size: ${company.pack_size}, Stock Balance: ${company.stock_balance}, Quantity: ${company.quantity}</li>`;
+                });
+                output += "</ul>";
+                document.getElementById('companies-list').innerHTML = output;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+</div></div></div>

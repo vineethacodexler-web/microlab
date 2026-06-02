@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    body {
+      background-color: #f4f6f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #eee;
+      padding: 1rem 1.5rem;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .sticky-filter-bar {
+      position: fixed;
+      top: 73px;
+      left: 0;
+      width: 100%;
+      z-index: 1050;
+      background-color: #ffffff;
+      padding: 10px 15px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .pagination a {
+      padding: 6px 10px;
+      margin: 2px;
+      border: 1px solid #ccc;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .pagination strong {
+      padding: 6px 10px;
+      background: #0d6efd;
+      color: white;
+      border-radius: 4px;
+    }
+
+    .pagination .ellipsis {
+      padding: 6px;
+    }
+  </style>
+</head>
+
+<body>
+
+{% include 'navbar3.html' %}
+
+<div class="sticky-filter-bar">
+
+  <div class="sticky-top bg-white" style="z-index: 1050; border-bottom:1px solid #ddd; padding:10px 15px;">
+    <h4 class="mb-0 fw-bold">Placed Orders</h4>
+
+    <form method="get" action="{% url 'placed_orders' %}" class="d-flex align-items-center gap-2 flex-nowrap" style="overflow-x:auto;">
+
+      <div class="d-flex align-items-center gap-2 flex-nowrap">
+
+        <select class="form-select form-select-sm" name="per_page" style="width:70px; flex-shrink:0;" onchange="this.form.submit();">
+          <option value="all" {% if request.GET.per_page == 'all' %}selected{% endif %}>All</option>
+          <option value="5" {% if request.GET.per_page == '5' %}selected{% endif %}>5</option>
+          <option value="10" {% if request.GET.per_page == '10' or not request.GET.per_page %}selected{% endif %}>10</option>
+          <option value="25" {% if request.GET.per_page == '25' %}selected{% endif %}>25</option>
+          <option value="50" {% if request.GET.per_page == '50' %}selected{% endif %}>50</option>
+          <option value="100" {% if request.GET.per_page == '100' %}selected{% endif %}>100</option>
+        
+        </select>
+
+        <input type="text"
+               id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="Search invoices / Vendors / Dates..."
+               style="width:200px; flex-shrink:0;">
+
+        <select class="form-select form-select-sm" name="vendor" style="width:150px; flex-shrink:0;">
+          <option value="">All</option>
+          {% for vendor in vendors %}
+            <option value="{{ vendor.name }}" {% if request.GET.vendor == vendor.name %}selected{% endif %}>
+              {{ vendor.name }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <select class="form-select form-select-sm" name="status" style="width:120px; flex-shrink:0;">
+          <option value="">All</option>
+          <option value="Paid" {% if request.GET.status == 'Paid' %}selected{% endif %}>Paid</option>
+          <option value="Pending" {% if request.GET.status == 'Pending' %}selected{% endif %}>Pending</option>
+          <option value="Cancelled" {% if request.GET.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+
+        <select class="form-select form-select-sm"
+                name="date_range"
+                id="date_range"
+                onchange="toggleCustomDate();"
+                style="width:120px; flex-shrink:0;">
+          <option value="" {% if not request.GET.date_range %}selected{% endif %}>All</option>
+          <option value="daily" {% if request.GET.date_range == 'daily' %}selected{% endif %}>Today</option>
+          <option value="weekly" {% if request.GET.date_range == 'weekly' %}selected{% endif %}>Weekly</option>
+          <option value="monthly" {% if request.GET.date_range == 'monthly' %}selected{% endif %}>Monthly</option>
+          <option value="custom" {% if request.GET.date_range == 'custom' %}selected{% endif %}>Custom</option>
+        </select>
+
+        <input type="date"
+               class="form-control form-control-sm"
+               name="start_date"
+               value="{{ request.GET.start_date }}"
+               id="start_date"
+               style="width:130px; display:none; flex-shrink:0;">
+
+        <input type="date"
+               class="form-control form-control-sm"
+               name="end_date"
+               value="{{ request.GET.end_date }}"
+               id="end_date"
+               style="width:130px; display:none; flex-shrink:0;">
+
+        <select class="form-select form-select-sm" name="invoice_filter" style="width:150px; flex-shrink:0;">
+          <option value="">All</option>
+          <option value="invoice" {% if request.GET.invoice_filter == 'invoice' %}selected{% endif %}>Invoice</option>
+          <option value="waiting" {% if request.GET.invoice_filter == 'waiting' %}selected{% endif %}>Waiting For Suppliers</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary btn-sm flex-shrink-0">Filter</button>
+
+        <a href="{% url 'placed_orders' %}" class="btn btn-secondary btn-sm flex-shrink-0">Clear</a>
+
+
+
+      </div>
+    </form>
+  </div>
+
+  <div class="d-flex align-items-center mt-2 gap-2">
+    <button type="button" class="btn btn-sm btn-info" id="select-all-btn">Select All</button>
+    <button type="button" class="btn btn-sm btn-secondary" id="unselect-all-btn">Unselect All</button>
+
+    <button type="button" class="btn btn-sm btn-danger ms-auto" id="bulk-delete-btn">
+      <i class="fas fa-trash"></i> Delete Selected
+    </button>
+    <button type="button" class="btn btn-success btn-sm" id="exportExcel">
+      <i class="fas fa-file-excel"></i> Export to Excel
+    </button>
+
+    <button type="button" class="btn btn-danger btn-sm" id="exportPDF">
+      <i class="fas fa-file-pdf"></i> Download PDF
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+  function toggleCustomDate() {
+    const range = document.getElementById("date_range").value;
+    document.getElementById("start_date").style.display = (range === "custom") ? "inline-block" : "none";
+    document.getElementById("end_date").style.display = (range === "custom") ? "inline-block" : "none";
+  }
+  toggleCustomDate();
+</script>
+
+<br><br><br><br><br><br>
+
+<div class="table-responsive px-3 pb-4" style="max-height: 400px; overflow-y: auto;">
+  <table class="table table-bordered align-middle text-center" id="invoiceTable">
+
+    <thead class="table-light sticky-top" style="background-color: #f8f9fa; z-index: 10;">
+      <tr>
+        <th scope="col">
+          <input type="checkbox" id="select-all">
+        </th>
+        <th scope="col">Invoice No</th>
+        <th scope="col">Date</th>
+        <th scope="col">Vendor</th>
+        <th scope="col">Invoice Date</th>
+        <th scope="col">Status</th>
+        <th scope="col">Method</th>
+        <th scope="col">Invoice</th>
+        <th scope="col">Total</th>
+        <th scope="col" colspan="2">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody id="invoiceBody">
+      {% if invoices %}
+        {% for invoice in invoices %}
+          <tr>
+            <td>
+              <input type="checkbox" class="select-item" value="{{ invoice.id }}">
+            </td>
+
+            <td>{{ invoice.invoice_number }}</td>
+
+            <td>{{ invoice.purchase_order.dateField|date:"d-m-Y" }}</td>
+
+            <td style="width:60px">{{ invoice.vendor.name }}</td>
+
+            <td>
+              {% if invoice.invoice_date %}
+                {{ invoice.invoice_date }}
+              {% else %}
+                Not invoiced
+              {% endif %}
+            </td>
+
+            <td>{{ invoice.status }}</td>
+
+            <td>{{ invoice.method }}</td>
+
+            <td>
+              {% if invoice.status != 'Draft' %}
+                <a href="{% url 'preview_invoice' invoice.id %}" class="btn btn-sm btn-primary">Invoiced</a>
+              {% else %}
+                <span style="background-color: yellow;color:black">Waiting for supplier</span>
+              {% endif %}
+            </td>
+
+            <td class="total-amount">{{ invoice.total_amount }}</td>
+
+            <td>
+              <a href="{% url 'invoice_edit' invoice.id %}" class="btn btn-sm btn-warning">Edit</a>
+            </td>
+
+            <td>
+              <form method="post" action="{% url 'invoice_delete' pk=invoice.pk %}" class="d-inline delete-form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger delete-btn">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="11" class="text-center text-muted">No data found</td>
+        </tr>
+      {% endif %}
+    </tbody>
+
+    <tfoot class="table-light">
+      <tr>
+        <td colspan="8" class="text-end fw-bold">Grand Total :</td>
+        <td id="overallTotal" class="fw-bold text-danger">0.00</td>
+        <td colspan="2"></td>
+      </tr>
+    </tfoot>
+
+  </table>
+</div>
+
+{% if invoices.has_other_pages %}
+<div class="pagination-wrapper d-flex justify-content-center align-items-center mt-3 mb-4">
+  <div class="pagination">
+
+    {% if invoices.has_previous %}
+      <a href="?page={{ invoices.previous_page_number }}&vendor={{ request.GET.vendor|urlencode }}&status={{ request.GET.status|urlencode }}&date_range={{ request.GET.date_range|urlencode }}&start_date={{ request.GET.start_date|urlencode }}&end_date={{ request.GET.end_date|urlencode }}&invoice_filter={{ request.GET.invoice_filter|urlencode }}&per_page={{ request.GET.per_page|urlencode }}">
+        Previous
+      </a>
+    {% endif %}
+
+    {% for num in invoices.paginator.page_range %}
+      {% if invoices.number == num %}
+        <strong>{{ num }}</strong>
+      {% elif num >= invoices.number|add:'-2' and num <= invoices.number|add:'2' %}
+        <a href="?page={{ num }}&vendor={{ request.GET.vendor|urlencode }}&status={{ request.GET.status|urlencode }}&date_range={{ request.GET.date_range|urlencode }}&start_date={{ request.GET.start_date|urlencode }}&end_date={{ request.GET.end_date|urlencode }}&invoice_filter={{ request.GET.invoice_filter|urlencode }}&per_page={{ request.GET.per_page|urlencode }}">
+          {{ num }}
+        </a>
+      {% endif %}
+    {% endfor %}
+
+    {% if invoices.has_next %}
+      <a href="?page={{ invoices.next_page_number }}&vendor={{ request.GET.vendor|urlencode }}&status={{ request.GET.status|urlencode }}&date_range={{ request.GET.date_range|urlencode }}&start_date={{ request.GET.start_date|urlencode }}&end_date={{ request.GET.end_date|urlencode }}&invoice_filter={{ request.GET.invoice_filter|urlencode }}&per_page={{ request.GET.per_page|urlencode }}">
+        Next
+      </a>
+    {% endif %}
+
+  </div>
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+    const table = document.getElementById('invoiceTable');
+
+    function calculateTableTotal() {
+      let grandTotal = 0;
+
+      document.querySelectorAll("#invoiceBody tr").forEach(row => {
+        if (row.style.display !== "none") {
+          const cell = row.querySelector(".total-amount");
+
+          if (cell) {
+            let value = cell.innerText
+              .replace(/,/g, '')
+              .replace(/[^\d.-]/g, '')
+              .trim();
+
+            let amount = parseFloat(value);
+
+            if (!isNaN(amount)) {
+              grandTotal += amount;
+            }
+          }
+        }
+      });
+
+      document.getElementById("overallTotal").innerText = grandTotal.toFixed(2);
+
+      return grandTotal.toFixed(2);
+    }
+
+    calculateTableTotal();
+
+    const searchInput = document.getElementById("searchInput");
+
+    searchInput.addEventListener("keyup", function () {
+      const searchValue = this.value.toLowerCase().trim();
+
+      document.querySelectorAll("#invoiceBody tr").forEach(row => {
+        const rowText = row.innerText.toLowerCase();
+
+        if (rowText.includes(searchValue)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+
+      calculateTableTotal();
+    });
+
+    function exportToPDF() {
+      const grandTotal = calculateTableTotal();
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("l", "pt", "a4");
+
+      const headers = Array.from(table.querySelectorAll('thead th'))
+        .slice(1, 9)
+        .map(th => th.innerText.trim());
+
+      const body = [];
+
+      table.querySelectorAll('tbody tr').forEach(tr => {
+        if (tr.style.display !== "none") {
+          const row = Array.from(tr.querySelectorAll('td'))
+            .slice(1, 9)
+            .map(td => td.innerText.trim());
+
+          if (row.length) {
+            body.push(row);
+          }
+        }
+      });
+
+      const footerRow = Array(headers.length).fill('');
+      footerRow[headers.length - 2] = "Grand Total";
+      footerRow[headers.length - 1] = grandTotal;
+      body.push(footerRow);
+
+      doc.text("Purchase Orders", 40, 30);
+
+      doc.autoTable({
+        head: [headers],
+        body: body,
+        startY: 50,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [245, 245, 245],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold'
+        },
+        bodyStyles: {
+          fontSize: 9
+        },
+        didParseCell: function (data) {
+          if (data.row.index === body.length - 1) {
+            data.cell.styles.fontStyle = 'bold';
+            data.cell.styles.fillColor = [230, 230, 230];
+            data.cell.styles.textColor = [0, 0, 0];
+          }
+        },
+        didDrawPage: function (data) {
+          const pageCount = doc.internal.getNumberOfPages();
+          const pageSize = doc.internal.pageSize;
+          const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+
+          doc.setFontSize(9);
+          doc.text(
+            `Page ${data.pageNumber} of ${pageCount}`,
+            pageSize.width - 80,
+            pageHeight - 20
+          );
+        }
+      });
+
+      doc.save("Purchase_Orders.pdf");
+    }
+
+    document.getElementById('exportPDF').addEventListener('click', exportToPDF);
+
+    document.getElementById('exportExcel')?.addEventListener('click', () => {
+      const grandTotal = calculateTableTotal();
+
+      const wb = XLSX.utils.book_new();
+      const ws_data = [];
+
+      const headersText = Array.from(table.querySelectorAll('thead th'))
+        .slice(1, 9)
+        .map(th => th.innerText.trim());
+
+      ws_data.push(headersText);
+
+      table.querySelectorAll('tbody tr').forEach(tr => {
+        if (tr.style.display !== "none") {
+          const row = Array.from(tr.querySelectorAll('td'))
+            .slice(1, 9)
+            .map(td => td.innerText.trim());
+
+          if (row.length) {
+            ws_data.push(row);
+          }
+        }
+      });
+
+      const footerRow = Array(headersText.length).fill('');
+      footerRow[headersText.length - 2] = 'Grand Total';
+      footerRow[headersText.length - 1] = grandTotal;
+
+      ws_data.push(footerRow);
+
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+      const footerRowNumber = ws_data.length;
+
+      for (let col = 0; col < headersText.length; col++) {
+        const cellAddress = XLSX.utils.encode_cell({
+          r: footerRowNumber - 1,
+          c: col
+        });
+
+        if (ws[cellAddress]) {
+          ws[cellAddress].s = {
+            font: { bold: true }
+          };
+        }
+      }
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Invoices');
+      XLSX.writeFile(wb, 'Invoices.xlsx');
+    });
+
+    const checkboxes = document.querySelectorAll('.select-item');
+    const selectAll = document.getElementById('select-all');
+
+    let selectedIdsInput = document.getElementById('selected_ids');
+
+    if (!selectedIdsInput) {
+      selectedIdsInput = document.createElement('input');
+      selectedIdsInput.type = 'hidden';
+      selectedIdsInput.name = 'selected_ids';
+      selectedIdsInput.id = 'selected_ids';
+      document.body.appendChild(selectedIdsInput);
+    }
+
+    function updateSelectedIds() {
+      selectedIdsInput.value = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value)
+        .join(',');
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener('change', updateSelectedIds));
+
+    selectAll.addEventListener('change', () => {
+      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      updateSelectedIds();
+    });
+
+    document.getElementById('select-all-btn')?.addEventListener('click', () => {
+      checkboxes.forEach(cb => cb.checked = true);
+      selectAll.checked = true;
+      updateSelectedIds();
+    });
+
+    document.getElementById('unselect-all-btn')?.addEventListener('click', () => {
+      checkboxes.forEach(cb => cb.checked = false);
+      selectAll.checked = false;
+      updateSelectedIds();
+    });
+
+    document.getElementById('bulk-delete-btn')?.addEventListener('click', () => {
+      const selected = selectedIdsInput.value.split(',').filter(Boolean);
+
+      if (!selected.length) {
+        return Swal.fire('No Selection', 'Please select at least one invoice.', 'warning');
+      }
+
+      Swal.fire({
+        title: 'Confirm Delete',
+        text: `Deleting ${selected.length} invoice(s).`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete'
+      }).then(result => {
+        if (result.isConfirmed) {
+          document.getElementById('bulk-delete-form').submit();
+        }
+      });
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', function(e) {
+      e.preventDefault();
+
+      Swal.fire({
+        title: 'Delete Invoice?',
+        text: 'This action is irreversible!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Delete'
+      }).then(result => {
+        if (result.isConfirmed) this.closest('form').submit();
+      });
+    }));
+
+  });
+</script>
+
+</body>
+</html>

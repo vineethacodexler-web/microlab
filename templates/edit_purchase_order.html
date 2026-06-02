@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Purchase Order</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .bg-light-blue {
+            background-color: #e9f2ff;
+        }
+    </style>
+</head>
+<body>
+{% include 'branch_navbar.html' %}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><strong>Edit Purchase Order #{{ po.id }}</strong></h4>
+        <a href="{% url 'view_purchase_orders' %}" class="btn btn-primary">Back to Orders</a>
+    </div>
+
+    {% include 'messages.html' %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="po_id" value="{{ po.id }}">
+
+        <!-- Vendor -->
+        <div class="mb-3">
+            <label for="vendor_id" class="form-label">Vendor</label>
+            <select class="form-select" name="vendor_id" id="vendor_id" required>
+                <option value="">-- Select Vendor --</option>
+                {% for vendor in vendors %}
+                    <option value="{{ vendor.id }}" {% if vendor.id == po.vendor.id %}selected{% endif %}>{{ vendor.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Invoice & Company -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="invoice_number" class="form-label">Invoice Number</label>
+                <input type="text" name="invoice_number" id="invoice_number" class="form-control" value="{{ po.invoice_number }}" required>
+            </div>
+            <div class="col-md-6">
+                <label for="company" class="form-label">Company</label>
+                <input type="text" name="company" id="company" class="form-control" value="{{ po.company }}" required>
+            </div>
+        </div>
+
+        <!-- Order Lines -->
+        <h5><strong>Order Lines</strong></h5>
+        <table class="table table-bordered bg-light-blue" id="lineItemsTable">
+            <thead class="table-primary">
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Pack</th>
+                    <th>Stock</th>
+                    <th>Qty</th>
+                    <th>GST</th>
+                    <th>HSN</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in po.order_lines.all %}
+                <tr>
+                    <td>
+                        <select name="item_id[]" class="form-select" required>
+                            <option value="">-- Select Item --</option>
+                            {% for item in items %}
+                                <option value="{{ item.id }}" {% if item.id == line.item.id %}selected{% endif %}>{{ item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="number" name="price[]" value="{{ line.price }}" class="form-control" step="0.01" required></td>
+                    <td><input type="text" name="pack[]" value="{{ line.pack }}" class="form-control"></td>
+                    <td><input type="number" name="stock[]" value="{{ line.stock }}" class="form-control" step="0.01"></td>
+                    <td><input type="number" name="qty[]" value="{{ line.qty }}" class="form-control" step="0.01" required></td>
+                    <td><input type="number" name="gst[]" value="{{ line.gst }}" class="form-control" step="0.01"></td>
+                    <td><input type="text" name="hsn[]" value="{{ line.hsn }}" class="form-control"></td>
+                    <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Add Line Button -->
+        <button type="button" class="btn btn-secondary mb-3" id="addLineBtn">+ Add Line</button>
+
+        <!-- Submit -->
+        <div class="mt-3">
+            <button type="submit" class="btn btn-success">Update Purchase Order</button>
+            <a href="{% url 'view_purchase_orders' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- JavaScript for Add Line -->
+<script>
+    const itemOptions = `
+        {% for item in items %}
+            <option value="{{ item.id }}">{{ item.name }}</option>
+        {% endfor %}
+    `;
+
+    document.getElementById('addLineBtn').addEventListener('click', function () {
+        const newRow = `
+            <tr>
+                <td><select name="item_id[]" class="form-select" required>${itemOptions}</select></td>
+                <td><input type="number" name="price[]" class="form-control" step="0.01" required></td>
+                <td><input type="text" name="pack[]" class="form-control"></td>
+                <td><input type="number" name="stock[]" class="form-control" step="0.01"></td>
+                <td><input type="number" name="qty[]" class="form-control" step="0.01" required></td>
+                <td><input type="number" name="gst[]" class="form-control" step="0.01"></td>
+                <td><input type="text" name="hsn[]" class="form-control"></td>
+                <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>
+            </tr>
+        `;
+        document.querySelector('#lineItemsTable tbody').insertAdjacentHTML('beforeend', newRow);
+    });
+</script>
+
+<!-- Font Awesome (optional) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</body>
+</html>

@@ -1,0 +1,60 @@
+{% include 'admin_navbar.html' %}
+
+<div class="main-content">
+
+    <div class="card">
+
+        <div class="card-header">
+            Usage Logs
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+
+                <thead>
+
+                    <tr>
+                        <th>Branch</th>
+                        <th>Activity</th>
+                        <th>Charge</th>
+                        <th>Date</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for log in logs %}
+
+                    <tr>
+
+                        <td>
+                            {{ log.user.registration.First_name }}
+                        </td>
+
+                        <td>
+                            {{ log.activity.name }}
+                        </td>
+
+                        <td>
+                            ₹ {{ log.total_charge }}
+                        </td>
+
+                        <td>
+                            {{ log.created_at }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

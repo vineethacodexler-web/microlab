@@ -1,0 +1,300 @@
+{% include 'admin_navbar.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Microlab Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .main-content {
+      margin-right: 370px;
+      padding: 1rem;
+    }
+
+    .right-cards-container {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 370px;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .small-box {
+      border-radius: 0.75rem;
+      background-color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      transition: transform 0.2s ease-in-out;
+      height: 120px;
+    }
+    .small-box:hover { transform: translateY(-3px); }
+
+    .small-box .icon-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .card-chart {
+      background-color: #ffffff;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-container {
+      height: 300px;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    @media (max-width: 768px) {
+      .main-content { margin-right: 0; }
+      .right-cards-container {
+        position: static;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        padding: 0;
+        margin-top: 1rem;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="main-content">
+
+  <!-- Filters -->
+  <form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-md-3">
+      <label for="filter" class="form-label">Date Filter</label>
+      <select name="filter" id="filter" class="form-select" onchange="toggleDateInputs()">
+        <option value="all" {% if filter == 'all' %}selected{% endif %}>All</option>
+        <option value="daily" {% if filter == 'daily' %}selected{% endif %}>Today</option>
+        <option value="weekly" {% if filter == 'weekly' %}selected{% endif %}>Last 7 Days</option>
+        <option value="monthly" {% if filter == 'monthly' %}selected{% endif %}>This Month</option>
+        <option value="yearly" {% if filter == 'yearly' %}selected{% endif %}>This Year</option>
+        <option value="custom" {% if filter == 'custom' %}selected{% endif %}>Custom Range</option>
+      </select>
+    </div>
+    <div class="col-md-3" id="custom-date-inputs" style="display: none;">
+      <label for="start_date" class="form-label">From</label>
+      <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+    </div>
+    <div class="col-md-3" id="custom-date-inputs-2" style="display: none;">
+      <label for="end_date" class="form-label">To</label>
+      <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-primary w-100 mt-4">Apply</button>
+    </div>
+  </form>
+
+  <script>
+    function toggleDateInputs() {
+      const filter = document.getElementById('filter').value;
+      const from = document.getElementById('custom-date-inputs');
+      const to = document.getElementById('custom-date-inputs-2');
+      const show = filter === 'custom';
+      from.style.display = show ? 'block' : 'none';
+      to.style.display = show ? 'block' : 'none';
+    }
+    window.addEventListener('DOMContentLoaded', toggleDateInputs);
+  </script>
+
+  <!-- Summary Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4 col-sm-6">
+      <div class="small-box d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted">Total Items</div>
+          <div class="fw-bold fs-3">{{ total_items }}</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+      <div class="small-box d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted">Total Branches</div>
+          <div class="fw-bold fs-3">{{ total_branches }}</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+      <div class="small-box d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted">Total Vendors</div>
+          <div class="fw-bold fs-3">{{ total_vendors }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+      <div class="small-box d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted">Total Purchase Amount</div>
+          <div class="fw-bold fs-3">₹ {{ totals.total_amount|default:"0.00"|floatformat:2 }}</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+      <div class="small-box d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted">Total Invoiced Amount</div>
+          <div class="fw-bold fs-3">₹ {{ invoice_totals.total_invoice_amount|default:"0.00"|floatformat:2 }}</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="row g-4 mb-4">
+    <!-- Two charts side by side -->
+    <div class="col-md-6">
+      <div class="card-chart chart-container">
+        <div class="fw-semibold mb-2"><i class="bi bi-pie-chart-fill me-2"></i>Entity Distribution</div>
+        <canvas id="entityChart"></canvas>
+      </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card-chart chart-container">
+          <div class="fw-semibold mb-2"><i class="bi bi-graph-up-arrow me-2"></i>Purchase vs Invoice</div>
+          <canvas id="amountChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+
+      <div class="card-chart chart-container">
+        <div class="fw-semibold mb-2"><i class="bi bi-bar-chart-line me-2"></i>Top Stocked Items</div>
+        <canvas id="stockChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full width Line chart -->
+ 
+</div>
+
+<!-- Right Sidebar -->
+<div class="right-cards-container">
+  <div class="card p-3 mb-3 shadow-sm">
+    <h6 class="mb-3"><i class="bi bi-stack me-2"></i>Stock Status</h6>
+    {% for item in items|dictsortreversed:"id" %}
+      {% if item.stock_balance < 1 %}
+        <div class="alert alert-danger py-2 px-2 mb-1 d-flex justify-content-between">
+          <span>{{ item.user.username }}</span>
+          <span>{{ item.name }}</span>
+          <span>{{ item.stock_balance }} (Low)</span>
+        </div>
+      {% else %}
+        <div class="d-flex justify-content-between py-2 px-2 border-bottom">
+          <div>{{ item.name }}</div>
+          <div class="text-muted mx-2">{{ item.company_name }}</div>
+          <div class="fw-bold">{{ item.stock_balance }}</div>
+        </div>
+      {% endif %}
+    {% endfor %}
+    <a href="{% url 'item_list_admin' %}" class="btn btn-outline-primary mt-3 w-100">Show More</a>
+  </div>
+
+  <div class="card p-3 shadow-sm">
+    <h6 class="mb-3"><i class="bi bi-people me-2"></i>Recent Vendors</h6>
+    {% for item in vendors|dictsortreversed:"id" %}
+      <div class="d-flex justify-content-between py-2 px-2 border-bottom">
+        <div>{{ item.name }}</div>
+        <div class="text-muted">{{ item.created_at }}</div>
+      </div>
+    {% endfor %}
+    <a href="{% url 'vendor_list_admin' %}" class="btn btn-outline-primary mt-3 w-100">Show More</a>
+  </div>
+</div>
+
+<script>
+  // Pie Chart
+  new Chart(document.getElementById('entityChart').getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: ['Branches', 'Vendors', 'Items'],
+      datasets: [{ 
+        data: [{{ total_branches }}, {{ total_vendors }}, {{ total_items }}],
+        backgroundColor: ['#a8dadc', '#ffe066', '#ffadad']
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  // Line Chart
+  new Chart(document.getElementById('stockChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: [{% for item in items %}'{{ item.name }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+      datasets: [{
+        label: 'Stock Balance',
+        data: [{% for item in items %}{{ item.stock_balance }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+        borderColor: '#457b9d',
+        backgroundColor: 'rgba(69,123,157,0.15)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  // Full width bar chart
+  new Chart(document.getElementById('amountChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Purchase', 'Invoice'],
+      datasets: [{
+        label: 'Amount (₹)',
+        data: [{{ totals.total_amount|default:0 }}, {{ invoice_totals.total_invoice_amount|default:0 }}],
+        backgroundColor: ['#90be6d', '#f9c74f']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { callback: value => '₹' + value.toFixed(2) } } }
+    }
+  });
+</script>
+
+</body>
+</html>

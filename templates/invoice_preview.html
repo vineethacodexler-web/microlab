@@ -1,0 +1,289 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Invoice - {{ invoice.invoice_number }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    body {
+      background-color: #f6f9fc;
+      font-family: 'Segoe UI', sans-serif;
+      color: #333;
+    }
+
+    .invoice-container {
+      max-width: 960px;
+      background: #fff;
+      padding: 30px;
+      margin: 40px auto;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.08);
+    }
+
+    .invoice-header {
+      border-bottom: 2px solid #0d6efd;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .invoice-header h2 {
+      color: #0d6efd;
+      font-weight: bold;
+    }
+
+    .company-info, .customer-info {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    table {
+      width: 100%;
+      font-size: 14px;
+      margin-bottom: 25px;
+      border-collapse: collapse;
+    }
+
+    table th, table td {
+      border: 1px solid #dee2e6;
+      padding: 8px;
+      text-align: center;
+    }
+
+    table th {
+      background-color: #0d6efd;
+      color: white;
+    }
+
+    .totals-table td {
+      border: none;
+      padding: 8px 10px;
+    }
+
+    .totals-table td:first-child {
+      font-weight: bold;
+      text-align: left;
+    }
+
+    .amount-in-words {
+      background: #f1f1f1;
+      padding: 10px;
+      border-left: 4px solid #0d6efd;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .footer {
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .no-print-buttons {
+      padding: 15px 20px;
+      background: #fff;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    @media print {
+      .no-print-buttons { display: none !important; }
+      body, .invoice-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .invoice-container { box-shadow: none; border: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Top Buttons -->
+  <div class="no-print-buttons d-flex justify-content-between align-items-center flex-wrap">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'placed_orders' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i> Back to Orders
+      </a>
+      <h4 class="mb-0 text-primary">Invoice - {{ invoice.invoice_number }}</h4>
+    </div>
+    <div class="d-flex gap-2">
+      <button onclick="window.print()" class="btn btn-outline-primary">
+        <i class="fas fa-print me-2"></i> Print
+      </button>
+      <button id="downloadPDF" class="btn btn-warning text-dark">
+        <i class="fas fa-file-download me-2"></i> Download PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Invoice Box -->
+  <div class="invoice-container" id="invoice-box">
+    <div class="invoice-header">
+      <h2>{{ bok.First_name }}</h2>
+      <p class="company-info">
+        {{ bok.address }}<br>
+        {% if bok.gst_num %}GSTIN: {{ bok.gst_num }} | {% endif %}
+        Phone: {{ bok.Mobile_Number }} | Email: {{ bok.Email }}
+      </p>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-sm-6">
+        <strong>Invoice Number:</strong> {{ invoice.invoice_number }}<br>
+        <strong>Date:</strong> {{ invoice.invoice_date }}<br>
+        <strong>Status:</strong> {{ invoice.status }}<br>
+        <strong>Method:</strong> {{ invoice.method }}
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-sm-6 customer-info">
+        <strong>Bill To:</strong><br>
+        {{ vendor.name }}<br>
+        {{ vendor.address|default:"-"|linebreaksbr }}<br>
+        {{ vendor.email|default:"-" }}<br>
+        {{ vendor.mobile_number|default:"-" }}
+      </div>
+      <div class="col-sm-6 customer-info">
+        <strong>Bill From:</strong><br>
+        {{ bok.First_name }}<br>
+        {{ bok.address }}<br>
+        Phone: {{ bok.Mobile_Number }}<br>
+        Email: {{ bok.Email }}
+      </div>
+    </div>
+
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Sl</th>
+          <th>HSN</th>
+          <th>Item</th>
+          <th>Expiry</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>GST (%)</th>
+          <th>SGST</th>
+          <th>CGST</th>
+          <th>Total(Excl. GST)</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in invoice.line_items.all %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ item.purchase_order_line.item.hsn }}</td>
+          <td>{{ item.purchase_order_line.item.name }}</td>
+          <td>{{ item.expiry_date|date:'d-m-Y' }}</td>
+          <td>{{ item.qty }}</td>
+          <td>{{ item.amount }}</td>
+          <td>{{ item.purchase_order_line.gst }}</td>
+          <td>{{ item.sgst_amount }}</td>
+          <td>{{ item.cgst_amount }}</td>
+          <td>{{ invoice.sub_total }}</td>
+          <td class="total-amount">{{ item.total_amount }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <td colspan="10" class="text-end"><strong>Sub Total</strong></td>
+          <td colspan="2"><strong><span id="sub-total">0.0</span></strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <tr>
+        <td colspan="10" class="text-end">SGST Total</td>
+        <td colspan="2">₹ <span id="total-sgst">{{ invoice.total_sgst }}</span></td>
+      </tr>
+      <tr>
+        <td colspan="10" class="text-end">CGST Total</td>
+        <td colspan="2">₹ <span id="total-cgst">{{ invoice.total_cgst }}</span></td>
+      </tr>
+      <tr>
+        <td colspan="10" class="text-end"><strong>Total Invoice Amount</strong></td>
+        <td colspan="2"><strong>₹ <span id="total-invoice">{{ invoice.total_amount }}</span></strong></td>
+      </tr>
+    </table>
+
+    <div class="amount-in-words">
+      Amount Chargeable (in words): <span id="amount-in-words">Zero</span>
+    </div>
+
+    <table class="table mt-4">
+      <tr>
+        <td class="text-center">Receiver's Signature</td>
+        <td class="text-center">For {{ vendor.name }}<br><br>Authorised Signatory</td>
+      </tr>
+    </table>
+
+    <div class="footer">
+      This is a computer-generated invoice. No signature is required.<br>
+      Goods once sold will not be taken back or exchanged.
+    </div>
+  </div>
+
+  <!-- JS Section -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // 1️⃣ Calculate and Round Sub Total (Ceiling)
+      let subtotal = 0;
+      document.querySelectorAll('.total-amount').forEach(function(el){
+        const val = parseFloat(el.textContent.replace(/[^0-9.-]+/g,'')) || 0;
+        subtotal += val;
+      });
+      const roundedSubTotal = Math.ceil(subtotal);
+      document.getElementById('sub-total').textContent = roundedSubTotal.toFixed(1);
+
+      // 2️⃣ Round SGST, CGST, Total Invoice (Ceiling)
+      const totalSgstEl = document.getElementById('total-sgst');
+      const totalCgstEl = document.getElementById('total-cgst');
+      const totalInvoiceEl = document.getElementById('total-invoice');
+
+      totalSgstEl.textContent = Math.ceil(parseFloat(totalSgstEl.textContent) || 0).toFixed(1);
+      totalCgstEl.textContent = Math.ceil(parseFloat(totalCgstEl.textContent) || 0).toFixed(1);
+      totalInvoiceEl.textContent = Math.ceil(parseFloat(totalInvoiceEl.textContent) || 0).toFixed(1);
+
+      // 3️⃣ Convert amount to words
+      function numberToWords(num) {
+        const a = ['', 'One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten',
+                  'Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+        const b = ['', '', 'Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+        if(num === 0) return 'Zero';
+        function inWords(n){
+          if(n < 20) return a[n];
+          if(n < 100) return b[Math.floor(n/10)] + (n%10 ? ' ' + a[n%10] : '');
+          if(n < 1000) return a[Math.floor(n/100)] + ' Hundred' + (n%100 ? ' ' + inWords(n%100) : '');
+          if(n < 1000000) return inWords(Math.floor(n/1000)) + ' Thousand' + (n%1000 ? ' ' + inWords(n%1000) : '');
+          return '';
+        }
+        return inWords(num);
+      }
+
+      document.getElementById('amount-in-words').textContent = numberToWords(Math.ceil(parseFloat(totalInvoiceEl.textContent)));
+    });
+  </script>
+
+  <!-- PDF Download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    document.getElementById("downloadPDF").addEventListener("click", () => {
+      const element = document.getElementById("invoice-box");
+      html2pdf().from(element).set({
+        margin: 0,
+        filename: 'invoice_{{ invoice.invoice_number }}.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).save();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Placed Orders</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4f6f9;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+            color: #1f2937;
+        }
+
+        .filter-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 1040;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+            padding: 14px 16px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 14px;
+            color: #111827;
+        }
+
+        .filter-row,
+        .action-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .filter-row::-webkit-scrollbar,
+        .action-bar::-webkit-scrollbar,
+        .table-responsive::-webkit-scrollbar {
+            height: 5px;
+            width: 6px;
+        }
+
+        .filter-row::-webkit-scrollbar-thumb,
+        .action-bar::-webkit-scrollbar-thumb,
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 20px;
+        }
+
+        .form-select-sm,
+        .form-control-sm {
+            height: 32px;
+            font-size: 12px;
+            border-radius: 6px;
+            box-shadow: none !important;
+        }
+
+        .btn-sm {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .action-bar {
+            margin-top: 10px;
+        }
+
+        .page-wrapper {
+            padding: 18px 16px 30px;
+        }
+
+        .table-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .table-responsive {
+            max-height: calc(100vh - 235px);
+            overflow: auto;
+        }
+
+        table {
+            margin-bottom: 0 !important;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #3160a8 !important;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            vertical-align: middle;
+            border-bottom: 1px solid #dbe2ea !important;
+        }
+
+        tbody td {
+            vertical-align: middle;
+            color: #374151;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .vendor-cell {
+            min-width: 210px;
+            max-width: 240px;
+            overflow-x: auto;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #eef2ff;
+            color: #3730a3;
+        }
+
+        .waiting-badge {
+            display: inline-block;
+            background: #fff3cd;
+            color: #856404;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .pagination a,
+        .pagination strong {
+            padding: 6px 10px;
+            margin: 2px;
+            border-radius: 7px;
+            border: 1px solid #d1d5db;
+            text-decoration: none;
+            color: #374151;
+            font-size: 12px;
+        }
+
+        .pagination strong {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: #ffffff;
+        }
+
+        .highlighted-row td {
+            animation: blinkHighlight 2s ease-in-out;
+        }
+
+        @keyframes blinkHighlight {
+            0% { background-color: #fee2e2 !important; }
+            50% { background-color: #fef3c7 !important; }
+            100% { background-color: #dcfce7 !important; }
+        }
+
+        @media (max-width: 768px) {
+            .filter-fixed {
+                padding: 12px;
+            }
+
+            .page-title {
+                font-size: 17px;
+            }
+
+            .page-wrapper {
+                padding: 12px;
+            }
+
+            .form-select-sm,
+            .form-control-sm {
+                height: 30px;
+                font-size: 11px;
+            }
+
+            .btn-sm {
+                padding: 5px 9px;
+                font-size: 11px;
+            }
+
+            .table-responsive {
+                max-height: calc(100vh - 250px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% include 'navbar3.html' %}
+
+<div class="filter-fixed">
+    <h4 class="page-title">Placed Orders</h4>
+
+    <form method="get" action="{% url 'placed_orders' %}">
+        <div class="filter-row">
+
+            <select class="form-select form-select-sm" name="per_page" style="width:75px;" onchange="this.form.submit();">
+                <option value="all" {% if request.GET.per_page == 'all' %}selected{% endif %}>All</option>
+                <option value="5" {% if request.GET.per_page == '5' %}selected{% endif %}>5</option>
+                <option value="10" {% if request.GET.per_page == '10' or not request.GET.per_page %}selected{% endif %}>10</option>
+                <option value="25" {% if request.GET.per_page == '25' %}selected{% endif %}>25</option>
+                <option value="50" {% if request.GET.per_page == '50' %}selected{% endif %}>50</option>
+                <option value="100" {% if request.GET.per_page == '100' %}selected{% endif %}>100</option>
+            </select>
+
+            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search..." style="width:210px;">
+
+            <select class="form-select form-select-sm" name="vendor" style="width:160px;">
+                <option value="">All Vendors</option>
+                {% for vendor in vendors %}
+                <option value="{{ vendor.name }}" {% if request.GET.vendor == vendor.name %}selected{% endif %}>
+                    {{ vendor.name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <select class="form-select form-select-sm" name="status" style="width:125px;">
+                <option value="">All Status</option>
+                <option value="Paid" {% if request.GET.status == 'Paid' %}selected{% endif %}>Paid</option>
+                <option value="Pending" {% if request.GET.status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Cancelled" {% if request.GET.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+
+            <select class="form-select form-select-sm" name="date_range" id="date_range" onchange="toggleCustomDate();" style="width:125px;">
+                <option value="" {% if not request.GET.date_range %}selected{% endif %}>All Date</option>
+                <option value="daily" {% if request.GET.date_range == 'daily' %}selected{% endif %}>Today</option>
+                <option value="weekly" {% if request.GET.date_range == 'weekly' %}selected{% endif %}>Weekly</option>
+                <option value="monthly" {% if request.GET.date_range == 'monthly' %}selected{% endif %}>Monthly</option>
+                <option value="custom" {% if request.GET.date_range == 'custom' %}selected{% endif %}>Custom</option>
+            </select>
+
+            <input type="date" class="form-control form-control-sm" name="start_date" value="{{ request.GET.start_date }}" id="start_date" style="width:135px; display:none;">
+            <input type="date" class="form-control form-control-sm" name="end_date" value="{{ request.GET.end_date }}" id="end_date" style="width:135px; display:none;">
+
+            <select class="form-select form-select-sm" name="invoice_filter" style="width:165px;">
+                <option value="">All Invoices</option>
+                <option value="invoice" {% if request.GET.invoice_filter == 'invoice' %}selected{% endif %}>Invoiced</option>
+                <option value="waiting" {% if request.GET.invoice_filter == 'waiting' %}selected{% endif %}>Waiting Supplier</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-filter me-1"></i>Apply
+            </button>
+
+            <a href="{% url 'placed_orders' %}" class="btn btn-secondary btn-sm">Clear</a>
+        </div>
+    </form>
+
+    <div class="action-bar">
+        <button type="button" class="btn btn-info btn-sm" id="select-all-btn">Select All</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="unselect-all-btn">Unselect</button>
+
+        <button type="button" class="btn btn-danger btn-sm ms-auto" id="bulk-delete-btn">
+            <i class="fas fa-trash me-1"></i>Delete Selected
+        </button>
+
+        <button type="button" class="btn btn-success btn-sm" id="exportExcel">
+            <i class="fas fa-file-excel me-1"></i>Excel
+        </button>
+
+        <button type="button" class="btn btn-danger btn-sm" id="exportPDF">
+            <i class="fas fa-file-pdf me-1"></i>PDF
+        </button>
+    </div>
+</div>
+
+<div class="page-wrapper">
+
+    <form method="post" action="{% url 'invoice_bulk_delete' %}" id="bulk-delete-form">
+        {% csrf_token %}
+        <input type="hidden" name="selected_ids" id="selected_ids">
+    </form>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center" id="invoiceTable">
+                <thead>
+                <tr>
+                    <th style="color: white;"><input type="checkbox" id="select-all"></th>
+                    <th style="color: white;">Invoice No</th>
+                    <th style="color: white;">Date</th>
+                    <th style="color: white;">Vendor</th>
+                    <th style="color: white;">Invoice Date</th>
+                    <th style="color: white;">Status</th>
+                    <th style="color: white;">Method</th>
+                    <th style="color: white;">Invoice</th>
+                    <th style="color: white;">Total</th>
+                    <th style="color: white;" colspan="2">Actions</th>
+                </tr>
+                </thead>
+
+                <tbody id="invoiceBody">
+                {% if invoices %}
+                    {% for invoice in invoices|dictsortreversed:"id" %}
+                    <tr id="invoice-row-{{ invoice.id }}" {% if request.GET.highlight == invoice.id|stringformat:"s" %}class="highlighted-row"{% endif %}>
+                        <td>
+                            <input type="checkbox" class="select-item" value="{{ invoice.id }}">
+                        </td>
+
+                        <td>{{ invoice.invoice_number|default:"--" }}</td>
+
+                        <td>{{ invoice.purchase_order.dateField|date:"d-m-Y" }}</td>
+
+                        <td class="vendor-cell">{{ invoice.vendor.name }}</td>
+
+                        <td>
+                            {% if invoice.invoice_date %}
+                                {{ invoice.invoice_date }}
+                            {% else %}
+                                Not invoiced
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="status-badge">{{ invoice.status }}</span>
+                        </td>
+
+                        <td>{{ invoice.method }}</td>
+
+                        <td>
+                            {% if invoice.status != 'Draft' %}
+                            <a href="{% url 'preview_invoice' invoice.id %}" class="btn btn-primary btn-sm">
+                                Invoiced
+                            </a>
+                            {% else %}
+                            <span class="waiting-badge">Waiting for supplier</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="total-amount">{{ invoice.total_amount }}</td>
+
+                        <td>
+                            <a href="{% url 'invoice_edit' invoice.id %}" class="btn btn-warning btn-sm">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                        </td>
+
+                        <td>
+                            <form method="post" action="{% url 'invoice_delete' pk=invoice.pk %}" class="d-inline delete-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm delete-btn">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="11" class="text-center text-muted py-4">No records found</td>
+                    </tr>
+                {% endif %}
+                </tbody>
+
+                <tfoot>
+                <tr>
+                    <td colspan="8" class="text-end fw-bold">Grand Total :</td>
+                    <td id="overallTotal" class="fw-bold text-danger">0.00</td>
+                    <td colspan="2"></td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    {% if invoices.has_other_pages %}
+    <div class="pagination-wrapper d-flex justify-content-center align-items-center mt-3 mb-4">
+        <div class="pagination">
+            {% if invoices.has_previous %}
+            <a href="?page={{ invoices.previous_page_number }}&vendor={{ request.GET.vendor|urlencode }}&status={{ request.GET.status|urlencode }}&date_range={{ request.GET.date_range|urlencode }}&start_date={{ request.GET.start_date|urlencode }}&end_date={{ request.GET.end_date|urlencode }}&invoice_filter={{ request.GET.invoice_filter|urlencode }}&per_page={{ request.GET.per_page|default:'10'|urlencode }}">Previous</a>
+            {% endif %}
+
+            {% for num in invoices.paginator.page_range %}
+                {% if invoices.number == num %}
+                    <strong>{{ num }}</strong>
+                {% elif num >= invoices.number|add:'-2' and num <= invoices.number|add:'2' %}
+                    <a href="?page={{ num }}&vendor={{ request.GET.vendor|urlencode }}&status={{ request.GET.status|urlencode }}&date_range={{ request.GET.date_range|urlencode }}&start_date={{ request.GET.start_date|urlencode }}&end_date={{ request.GET.end_date|urlencode }}&invoice_filter={{ request.GET.invoice_filter|urlencode }}&per_page={{ request.GET.per_page|default:'10'|urlencode }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if invoices.has_next %}
+            <a href="?page={{ invoices.next_page_number }}&vendor={{ request.GET.vendor|urlencode }}&status={{ request.GET.status|urlencode }}&date_range={{ request.GET.date_range|urlencode }}&start_date={{ request.GET.start_date|urlencode }}&end_date={{ request.GET.end_date|urlencode }}&invoice_filter={{ request.GET.invoice_filter|urlencode }}&per_page={{ request.GET.per_page|default:'10'|urlencode }}">Next</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function toggleCustomDate() {
+        const range = document.getElementById("date_range").value;
+        document.getElementById("start_date").style.display = range === "custom" ? "inline-block" : "none";
+        document.getElementById("end_date").style.display = range === "custom" ? "inline-block" : "none";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        toggleCustomDate();
+
+        const table = document.getElementById("invoiceTable");
+        const searchInput = document.getElementById("searchInput");
+        const selectAll = document.getElementById("select-all");
+        const selectedIdsInput = document.getElementById("selected_ids");
+
+        function getVisibleRows() {
+            return Array.from(document.querySelectorAll("#invoiceBody tr"))
+                .filter(row => row.style.display !== "none" && row.querySelector(".total-amount"));
+        }
+
+        function calculateTableTotal() {
+            let grandTotal = 0;
+
+            getVisibleRows().forEach(row => {
+                const cell = row.querySelector(".total-amount");
+                let value = cell.innerText.replace(/,/g, "").replace(/[^\d.-]/g, "").trim();
+                let amount = parseFloat(value);
+
+                if (!isNaN(amount)) {
+                    grandTotal += amount;
+                }
+            });
+
+            document.getElementById("overallTotal").innerText = grandTotal.toFixed(2);
+        }
+
+        function updateSelectedIds() {
+            const selected = Array.from(document.querySelectorAll(".select-item:checked"))
+                .map(cb => cb.value);
+
+            selectedIdsInput.value = selected.join(",");
+        }
+
+        function getExportRows() {
+            const selectedRows = Array.from(document.querySelectorAll(".select-item:checked"))
+                .map(cb => cb.closest("tr"))
+                .filter(row => row && row.style.display !== "none");
+
+            return selectedRows.length ? selectedRows : getVisibleRows();
+        }
+
+        function getRowsTotal(rows) {
+            let total = 0;
+
+            rows.forEach(row => {
+                const cell = row.querySelector(".total-amount");
+                if (cell) {
+                    let value = cell.innerText.replace(/,/g, "").replace(/[^\d.-]/g, "").trim();
+                    let amount = parseFloat(value);
+                    if (!isNaN(amount)) {
+                        total += amount;
+                    }
+                }
+            });
+
+            return total.toFixed(2);
+        }
+
+        function getFilterText() {
+            const vendor = "{{ request.GET.vendor|default:''|escapejs }}";
+            const status = "{{ request.GET.status|default:''|escapejs }}";
+            const dateRange = "{{ request.GET.date_range|default:''|escapejs }}";
+            const startDate = "{{ request.GET.start_date|default:''|escapejs }}";
+            const endDate = "{{ request.GET.end_date|default:''|escapejs }}";
+            const invoiceFilter = "{{ request.GET.invoice_filter|default:''|escapejs }}";
+
+            let filterText = "";
+
+            if (vendor) filterText += `Vendor: ${vendor}   `;
+            if (status) filterText += `Status: ${status}   `;
+            if (invoiceFilter === "invoice") filterText += "Type: Invoice   ";
+            if (invoiceFilter === "waiting") filterText += "Type: Waiting For Supplier   ";
+            if (dateRange === "daily") filterText += "Date: Today   ";
+            if (dateRange === "weekly") filterText += "Date: Weekly   ";
+            if (dateRange === "monthly") filterText += "Date: Monthly   ";
+            if (dateRange === "custom") filterText += `From: ${startDate} To: ${endDate}   `;
+
+            return filterText.trim();
+        }
+
+        calculateTableTotal();
+
+        searchInput.addEventListener("keyup", function () {
+            const searchValue = this.value.toLowerCase().trim();
+
+            document.querySelectorAll("#invoiceBody tr").forEach(row => {
+                const rowText = row.innerText.toLowerCase();
+                row.style.display = rowText.includes(searchValue) ? "" : "none";
+            });
+
+            calculateTableTotal();
+        });
+
+        document.querySelectorAll(".select-item").forEach(cb => {
+            cb.addEventListener("change", updateSelectedIds);
+        });
+
+        selectAll.addEventListener("change", function () {
+            document.querySelectorAll(".select-item").forEach(cb => {
+                cb.checked = this.checked;
+            });
+
+            updateSelectedIds();
+        });
+
+        document.getElementById("select-all-btn").addEventListener("click", function () {
+            document.querySelectorAll(".select-item").forEach(cb => cb.checked = true);
+            selectAll.checked = true;
+            updateSelectedIds();
+        });
+
+        document.getElementById("unselect-all-btn").addEventListener("click", function () {
+            document.querySelectorAll(".select-item").forEach(cb => cb.checked = false);
+            selectAll.checked = false;
+            updateSelectedIds();
+        });
+
+        document.getElementById("bulk-delete-btn").addEventListener("click", function () {
+            updateSelectedIds();
+
+            const selected = selectedIdsInput.value.split(",").filter(Boolean);
+
+            if (!selected.length) {
+                Swal.fire("No Selection", "Please select at least one invoice.", "warning");
+                return;
+            }
+
+            Swal.fire({
+                title: "Confirm Delete",
+                text: `Deleting ${selected.length} invoice(s).`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc3545",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Yes, delete"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    document.getElementById("bulk-delete-form").submit();
+                }
+            });
+        });
+
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: "Delete Invoice?",
+                    text: "This action is irreversible!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#dc3545",
+                    cancelButtonColor: "#6c757d",
+                    confirmButtonText: "Delete"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        this.closest("form").submit();
+                    }
+                });
+            });
+        });
+
+        document.getElementById("exportPDF").addEventListener("click", function () {
+            const rowsToExport = getExportRows();
+            const grandTotal = getRowsTotal(rowsToExport);
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF("l", "pt", "a4");
+
+            const headers = Array.from(table.querySelectorAll("thead th"))
+                .slice(1, 9)
+                .map(th => th.innerText.trim());
+
+            const body = rowsToExport.map(tr =>
+                Array.from(tr.querySelectorAll("td"))
+                    .slice(1, 9)
+                    .map(td => td.innerText.trim())
+            );
+
+            const footerRow = Array(headers.length).fill("");
+            footerRow[headers.length - 2] = "Grand Total";
+            footerRow[headers.length - 1] = grandTotal;
+            body.push(footerRow);
+
+            const filterText = getFilterText();
+            const selectedCount = document.querySelectorAll(".select-item:checked").length;
+
+            doc.setFontSize(16);
+            doc.text("Placed Orders", 40, 30);
+
+            doc.setFontSize(10);
+            doc.text(selectedCount > 0 ? `Selected Records: ${selectedCount}` : "Exported Records: All Visible Records", 40, 48);
+
+            if (filterText) {
+                doc.text(filterText, 40, 64);
+            }
+
+            doc.autoTable({
+                head: [headers],
+                body: body,
+                startY: filterText ? 82 : 66,
+                theme: "grid",
+                headStyles: {
+                    fillColor: [245, 245, 245],
+                    textColor: [0, 0, 0],
+                    fontStyle: "bold"
+                },
+                bodyStyles: {
+                    fontSize: 9
+                },
+                didParseCell: function (data) {
+                    if (data.row.index === body.length - 1) {
+                        data.cell.styles.fontStyle = "bold";
+                        data.cell.styles.fillColor = [230, 230, 230];
+                    }
+                }
+            });
+
+            doc.save("Placed_Orders.pdf");
+        });
+
+        document.getElementById("exportExcel").addEventListener("click", function () {
+            const rowsToExport = getExportRows();
+            const grandTotal = getRowsTotal(rowsToExport);
+            const wb = XLSX.utils.book_new();
+            const wsData = [];
+
+            const filterText = getFilterText();
+            const selectedCount = document.querySelectorAll(".select-item:checked").length;
+
+            wsData.push(["Placed Orders"]);
+            wsData.push([selectedCount > 0 ? `Selected Records: ${selectedCount}` : "Exported Records: All Visible Records"]);
+
+            if (filterText) {
+                wsData.push([filterText]);
+            }
+
+            wsData.push([]);
+
+            const headers = Array.from(table.querySelectorAll("thead th"))
+                .slice(1, 9)
+                .map(th => th.innerText.trim());
+
+            wsData.push(headers);
+
+            rowsToExport.forEach(tr => {
+                wsData.push(
+                    Array.from(tr.querySelectorAll("td"))
+                        .slice(1, 9)
+                        .map(td => td.innerText.trim())
+                );
+            });
+
+            const footerRow = Array(headers.length).fill("");
+            footerRow[headers.length - 2] = "Grand Total";
+            footerRow[headers.length - 1] = grandTotal;
+            wsData.push(footerRow);
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            ws["!cols"] = [
+                { wch: 18 },
+                { wch: 15 },
+                { wch: 25 },
+                { wch: 18 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 }
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws, "Placed Orders");
+            XLSX.writeFile(wb, "Placed_Orders.xlsx");
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        const highlightId = params.get("highlight");
+
+        if (highlightId) {
+            const row = document.getElementById(`invoice-row-${highlightId}`);
+
+            if (row) {
+                setTimeout(() => {
+                    row.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                }, 300);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+{% include 'admin_navbar.html' %}
+<body style="background-color: #edf0f6;">
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+<style>
+    .main-content {
+        padding: 30px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    .topbar {
+        margin-bottom: 25px;
+    }
+
+    .topbar h4 {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .btn-success {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .modal-content {
+        border-radius: 12px;
+    }
+
+    .modal-header {
+        border-bottom: none;
+    }
+
+    .modal-title {
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+    }
+
+    .table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    thead.table-primary {
+        background-color: #007bff;
+        color: white;
+        font-weight: 600;
+    }
+
+    .table th, .table td {
+        vertical-align: middle !important;
+        text-align: center;
+    }
+
+    .btn-outline-primary, .btn-outline-danger {
+        border-radius: 6px;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+</style>
+
+<!-- Main Content -->
+<div >
+    <div class=" d-flex justify-content-between align-items-center">
+        <h4>Item Management</h4>
+  
+</div><br>
+   
+
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table align-middle table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th style="background-color: aliceblue;color:black">Sl No</th>
+                    <th style="background-color: aliceblue;color:black">Branch</th>
+                    <th style="background-color: aliceblue;color:black">Item Name</th>
+                    <th style="background-color: aliceblue;color:black">Company Name</th>
+                    <th style="background-color: aliceblue;color:black">HSN</th>
+                    <th style="background-color: aliceblue;color:black">Vendor</th>
+              
+                    <th style="background-color: aliceblue;color:black">Pack Size</th>
+                    <th style="background-color: aliceblue;color:black">GST</th>
+                    <th style="background-color: aliceblue;color:black">Item Price</th>
+                    <th style="background-color: aliceblue;color:black">New Stock</th>
+                   
+                    <th style="background-color: aliceblue;color:black">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items %}
+                    {% for item in items|dictsortreversed:"id" %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.user.username }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.company_name }}</td>
+                        <td>{{ item.hsn }} </td>
+                        <td>{{ item.vendor.name }}</td>
+                      
+                        <td>{{ item.pack_size }}</td>
+                        <td>{{ item.gst }} </td>
+                        <td>{{ item.item_price }} Rs</td>
+                        <td>{{ item.stock_balance }}</td>
+                     
+                        <td>
+                 
+                            <form method="post" action="{% url 'item_delete_admin' item.id %}" class="d-inline" id="delete-form-{{ item.id }}">
+                                {% csrf_token %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete({{ item.id }})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No items found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(itemId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + itemId).submit();
+            }
+        });
+    }
+</script>
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">

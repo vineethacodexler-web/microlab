@@ -1,0 +1,279 @@
+{% include 'admin_navbar.html' %}
+<body style="background-color: #edf0f6;">
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+{% for i in gtt %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<div >
+<div class=" d-flex justify-content-between align-items-center">
+<h4>Account Settings</h4>
+
+</div>
+
+<div class="col-xl-8">
+
+  <div class="card">
+    <div class="card-body pt-3">
+
+      <ul class="nav nav-tabs nav-tabs-bordered">
+
+        <li class="nav-item">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Overview</button>
+        </li>
+
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit Profile</button>
+        </li>
+
+
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Change Password</button>
+        </li>
+
+
+      </ul>
+      <div class="tab-content pt-2">
+
+        <div class="tab-pane fade show active profile-overview" id="profile-overview">
+
+          <h5 class="card-title">Profile Details</h5><br>
+
+          <div class="row">
+            <div class="col-lg-3 col-md-4 label "style="width:auto ">Full Name</div>
+            <div class="col-lg-9 col-md-8" style="width:auto; ">&nbsp&nbsp&nbsp
+              &nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp{{bb1.First_name}} {{bb1.Last_name}}</div>
+          </div>
+          <div class="row">
+            <div class="col-lg-3 col-md-4 label" style="width:auto ">Job</div>
+            <div class="col-lg-9 col-md-8" style="width:auto ">&nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp&nbsp&nbsp&nbspAdministrator</div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-3 col-md-4 label" style="width:auto ">Contact Number</div>
+            <div class="col-lg-9 col-md-8" style="width:auto ">{{bb1.Mobile_Number}} </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-3 col-md-4 label"style="width:auto ">Email </div>
+            <div class="col-lg-9 col-md-8"style="width:auto ">
+              &nbsp&nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+              &nbsp{{bb1.Email}}</div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-3 col-md-4 label"style="width:auto ">Date Joined</div>
+            <div class="col-lg-9 col-md-8"style="width:auto ">
+              &nbsp&nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp
+       {{bb1.Registration_date}}</div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-3 col-md-4 label"style="width:auto ">Password</div>
+            <div class="col-lg-9 col-md-8"style="width:auto ">
+              &nbsp&nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp{{bb1.Password}}</div>
+
+          </div>
+         <br>
+          <button class="btn btn-primary-" style="background-color: red;color:white;" onclick="window.location.href = '{% url 'del_admin' i.id %}';">Delete Account</button>
+          {% endfor %}
+          <div class="row">
+            <div class="col-lg-3 col-md-4 label"style="width:auto "></div>
+            <div class="col-lg-9 col-md-8"style="width:auto ">
+              &nbsp&nbsp&nbsp&nbsp&nbsp
+              &nbsp&nbsp
+
+             </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+
+          <form action="{% url 'bnb' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row mb-3">
+              <div style="color:Red;">
+                {% if messages %}
+                  {% for msg in messages %}
+                    {{ msg }}
+                  {% endfor %}
+                {% endif %}
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="Image" class="col-md-4 col-lg-3 col-form-label">Logo</label>
+              <div class="col-md-8 col-lg-9">
+                <input name="photo" type="file" class="form-control" id="Image" value="{{bb1.Image}}">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label for="fullName" class="col-md-4 col-lg-3 col-form-label">First Name</label>
+              <div class="col-md-8 col-lg-9">
+                <input type="text" class="form-control" id="fullName" value="{{bb1.First_name}}" name="first"  title="Please enter alphabets only" required>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label for="fullName" class="col-md-4 col-lg-3 col-form-label">Last Name</label>
+              <div class="col-md-8 col-lg-9">
+                <input type="text" class="form-control" id="fullName" value="{{bb1.Last_name}}" name="last" title="Please enter alphabets only" >
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label for="company" class="col-md-4 col-lg-3 col-form-label">User Name</label>
+              <div class="col-md-8 col-lg-9">
+                <input type="text" class="form-control" id="userName" value="{{um.username}}" name="user_name" pattern="[A-Za-z]+" title="Please enter alphabets only" required>
+                <input type="hidden" value="{{bb1.Password}}" name="psw">
+                <input type="hidden" value="{{bb1.Image}}" name="photo">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label for="Email" class="col-md-4 col-lg-3 col-form-label">Email</label>
+              <div class="col-md-8 col-lg-9">
+                <input name="em" type="email" class="form-control" id="Email" value="{{bb1.Email}}" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
+              </div>
+            </div>
+
+
+            <div class="row mb-3">
+              <label for="gst" class="col-md-4 col-lg-3 col-form-label">Gst number</label>
+              <div class="col-md-8 col-lg-9">
+                <input name="gst_num" type="text" class="form-control" id="gst" value="{{bb1.gst_num}}" >
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label for="mn" class="col-md-4 col-lg-3 col-form-label">Mobile number</label>
+              <div class="col-md-8 col-lg-9">
+                <input name="mn" type="text" class="form-control" id="mn" value="{{bb1.Mobile_Number}}" required>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label for="gst" class="col-md-4 col-lg-3 col-form-label">Address</label>
+              <div class="col-md-8 col-lg-9">
+                <textarea name="addr" class="form-control" id="addr" required>{{ bb1.address }}</textarea>
+              </div>
+            </div>
+
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+                             </div>
+
+
+
+        <div class="tab-pane fade pt-3" id="profile-change-password">
+          <form  action="{% url 'bnb' %}" method="post">
+
+            {% csrf_token %}
+            <div class="row mb-3">
+              <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Current Password</label>
+              <div class="col-md-8 col-lg-9">
+                <span  class="form-control"  >{{bb1.Password}}</span>
+
+              </div>
+            </div>
+
+
+            <div class="row mb-3">
+              <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">New Password</label>
+              <div class="col-md-8 col-lg-9">
+                  <input name="psw" type="password" class="form-control" id="newPassword" oninput="validatePassword()" pattern="^(?=.*[A-Za-z])(?=.*\d).{8,}$" title="Password must be at least 8 characters long and include both numbers and alphabets only" required>
+                  <input type="hidden"  value="{{um.username}}" name="user_name">
+                  <input type="hidden"  value="{{bb1.Email}}" name="em">
+                  <input type="hidden"  value="{{bb1.First_name}}" name="first">
+                  <input type="hidden"  value="{{bb1.Last_name}}" name="last">
+                  <input type="hidden"  value="{{bb1.Image}}" name="photo">
+
+                </div>
+          </div>
+
+          <div class="row mb-3">
+              <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
+              <div class="col-md-8 col-lg-9">
+                  <input name="psw"  type="password" class="form-control" id="renewPassword" oninput="validatePassword()" pattern="^(?=.*[A-Za-z])(?=.*\d).{8,}$" title="Password must be at least 8 characters long and include both numbers and alphabets only" required>
+                  <small id="passwordHelp" class="form-text text-muted"></small>
+              </div>
+          </div>
+
+          <script>
+              function validatePassword() {
+                  var newPassword = document.getElementById("newPassword").value;
+                  var renewPassword = document.getElementById("renewPassword").value;
+                  var passwordHelp = document.getElementById("passwordHelp");
+                  var changePasswordBtn = document.getElementById("changePasswordBtn");
+
+                  if (newPassword === renewPassword) {
+                      passwordHelp.textContent = "Passwords match!";
+                      passwordHelp.style.color = "green";
+                      changePasswordBtn.disabled = false;
+                  } else {
+                      passwordHelp.textContent = "Passwords do not match.";
+                      passwordHelp.style.color = "red";
+                      changePasswordBtn.disabled = true;
+                  }
+              }
+          </script>
+
+          <div class="text-center">
+              <button type="submit" class="btn btn-primary" id="changePasswordBtn" disabled>Change Password</button>
+          </div>
+                 </form>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+</section>
+
+</main>
+
+
+
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<script src="static/assets/vendor/apexcharts/apexcharts.min.js"></script>
+<script src="static/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="static/assets/vendor/chart.js/chart.umd.js"></script>
+<script src="static/assets/vendor/echarts/echarts.min.js"></script>
+<script src="static/assets/vendor/quill/quill.min.js"></script>
+<script src="static/assets/vendor/simple-datatables/simple-datatables.js"></script>
+<script src="static/assets/vendor/tinymce/tinymce.min.js"></script>
+<script src="static/assets/vendor/php-email-form/validate.js"></script>
+
+
+<script src="static/assets/js/main.js"></script>
+
+
+
+<script src="static/assets/vendor/apexcharts/apexcharts.min.js"></script>
+<script src="static/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="static/assets/vendor/chart.js/chart.umd.js"></script>
+<script src="static/assets/vendor/echarts/echarts.min.js"></script>
+<script src="static/assets/vendor/quill/quill.min.js"></script>
+<script src="static/assets/vendor/simple-datatables/simple-datatables.js"></script>
+<script src="static/assets/vendor/tinymce/tinymce.min.js"></script>
+<script src="static/assets/vendor/php-email-form/validate.js"></script>
+<script src="static/assets/js/main.js"></script>
+</body>
+
+</html>

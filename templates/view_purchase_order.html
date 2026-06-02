@@ -1,0 +1,313 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Purchase Order - Microlab</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    @page {
+      margin: 30px 40px;
+    }
+
+    body {
+      background-color: #f6f9fc;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .inv-invoice-box {
+      background: #fff;
+      padding: 40px;
+      border: 1px solid #ccc;
+      max-width: 1000px;
+      margin: 20px auto;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+
+    .inv-header {
+      text-align: center;
+      border-bottom: 3px solid #007bff;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .inv-company-name {
+      font-size: 26px;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .inv-company-info {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    table th, table td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .inv-items-table th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .inv-totals-table td {
+      text-align: right;
+      padding: 6px 10px;
+    }
+
+    .inv-totals-table td:first-child {
+      text-align: left;
+      font-weight: bold;
+    }
+
+    .inv-amount-in-words {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #f1f1f1;
+      border-left: 4px solid #007bff;
+    }
+
+    .inv-footer {
+      text-align: center;
+      font-size: 11px;
+      color: #777;
+      margin-top: 30px;
+    }
+
+    .no-print-buttons {
+      background-color: #ffffff;
+      padding: 20px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .no-print-buttons button {
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .no-print-buttons h4 {
+      font-weight: bold;
+      color: #333;
+    }
+
+    @media print {
+      .no-print-buttons, .d-print-none {
+        display: none !important;
+      }
+
+      html, body {
+        background: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .inv-invoice-box {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="no-print-buttons">
+  {% include 'branch_navbar.html' %}
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <a href="{% url 'company_list' %}" class="btn btn-outline-secondary no-hover">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+    
+    <style>
+    /* Remove hover effects for this button */
+    .no-hover:hover,
+    .no-hover:focus,
+    .no-hover:active {
+        background-color: transparent !important; /* Keep it transparent */
+        color: inherit !important;               /* Keep original text color */
+        box-shadow: none !important;             /* Remove any focus shadow */
+    }
+    </style>
+    
+      <h4 class="mb-0">Purchase Order</h4>
+    </div>
+
+    <form method="post" action="{% url 'generate_invoice' %}" class="d-flex gap-2 flex-wrap">
+      {% csrf_token %}
+      <input type="hidden" name="vendor_id" value="{{ vendor.id }}">
+      <input type="hidden" name="status" value="{{ status }}">
+      <input type="hidden" name="method" value="{{ method }}">
+
+      <button type="button" class="btn btn-outline-primary" onclick="window.print()" title="Print">
+        <i class="fas fa-print"></i> Print
+      </button>
+      <button type="submit" name="action" value="download" class="btn btn-outline-warning" title="Download PDF" style="background-color: antiquewhite; color: black;">
+        <i class="fas fa-file-download"></i> PDF
+      </button>
+      <button type="submit" name="action" value="email" class="btn btn-outline-success" title="Send by Email">
+        <i class="fas fa-envelope"></i> Email
+      </button>
+      <button type="submit" name="action" value="whatsapp" class="btn text-white" style="background-color:#25D366;" title="Send on WhatsApp">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="inv-invoice-box">
+  <div class="inv-header">
+    <div class="inv-company-name">{{ bok.First_name }}</div>
+    <div class="inv-company-info">
+      {{ bok.address }}<br>
+      {% if bok.gst_num %}GSTIN: {{ bok.gst_num }}{% endif %} | Phone: {{ bok.Mobile_Number }} | Email: {{ bok.Email }}
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <td><strong>Purchase Order:</strong> {{ invoice_number }}</td>
+      <td><strong>Date:</strong> {{ order_items.0.created_at|date:"d-m-Y" }}</td>
+    </tr>
+    <tr>
+      <div style="display: flex; justify-content: space-between; gap: 40px; margin-bottom: 20px;">
+        <div style="flex: 1; text-align: left;">
+          <strong>Bill To:</strong><br>
+          {{ vendor.name }}<br>
+          {{ vendor.address }}<br>
+          {{ vendor.email }}<br>
+          {{ vendor.mobile_number }}
+        </div>
+        <div style="flex: 1; text-align: left;">
+          <strong>Bill From:</strong><br>
+          {{ bok.First_name }}<br>
+          {{ bok.address }}<br>
+          {{ bok.Email }}<br>
+          {{ bok.Mobile_Number }}
+        </div>
+      </div>
+    </tr>
+    <tr>
+      <td><strong>State Name:</strong> Kerala</td>
+      <td>
+        <strong>Terms of Delivery:</strong><br>
+        Status: <strong>{{ status }}</strong><br>
+        Payment Method: {{ method }}<br>
+        Place of Supply: Kerala
+      </td>
+    </tr>
+  </table>
+
+  <table class="inv-items-table">
+    <thead>
+      <tr>
+        <th>Sl</th>
+        <th>Item</th>
+        <th>HSN/SAC</th>
+        <th>Rate</th>
+        <th>Qty</th>
+        <th>GST (%)</th>
+        <th>Gross</th>
+        <th>Total (Incl. GST)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order_items %}
+      <tr class="invoice-row">
+        <td>{{ forloop.counter }}</td>
+        <td>{{ item.item.name }}</td>
+        <td>{{ item.hsn }}</td>
+        <td class="rate">{{ item.amount|floatformat:2 }}</td>
+        <td class="qty">{{ item.qty }}</td>
+        <td class="gst">{{ item.gst|floatformat:2 }}</td>
+        <td class="row-total">{{ item.total|floatformat:2 }}</td>
+        <td class="total-with-gst"></td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="6" style="text-align:right;"><strong>Sub Total</strong></td>
+        <td><strong>{{ summary.sub_total|floatformat:2 }}</strong></td>
+        <td id="calculatedSubtotal"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="inv-totals-table">
+    <tr>
+      <td>SGST Total</td>
+      <td>₹ {{ summary.sgst|floatformat:2 }}</td>
+    </tr>
+    <tr>
+      <td>CGST Total</td>
+      <td>₹ {{ summary.cgst|floatformat:2 }}</td>
+    </tr>
+    <tr>
+      <td><strong>Total Invoice Amount</strong></td>
+      <td><strong>₹ {{ summary.total_amount|floatformat:2 }}</strong></td>
+    </tr>
+  </table>
+
+  <div class="inv-amount-in-words">
+    <strong>Amount Chargeable (in words):</strong> {{ summary.amount_in_words }}
+  </div>
+
+  <table>
+    <tr>
+      <td style="text-align: center;">Receiver's Signature</td>
+      <td style="text-align: center;">For {{ vendor.name }}<br><br>Authorised Signatory</td>
+    </tr>
+  </table>
+
+  <div class="inv-footer">
+    This is a computer-generated invoice. No signature is required.<br>
+    Goods once sold will not be taken back or exchanged. Please check items at the time of delivery.
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let grandTotal = 0;
+    document.querySelectorAll(".invoice-row").forEach(row => {
+      const rate = parseFloat(row.querySelector(".rate")?.textContent.trim() || 0);
+      const qty = parseFloat(row.querySelector(".qty")?.textContent.trim() || 0);
+      const gst = parseFloat(row.querySelector(".gst")?.textContent.trim() || 0);
+      const gross = rate * qty;
+      const totalWithGst = gross + (gross * gst / 100);
+      grandTotal += totalWithGst;
+
+      const grossCell = row.querySelector(".row-total");
+      if (grossCell) grossCell.textContent = gross.toFixed(2);
+
+      const totalCell = row.querySelector(".total-with-gst");
+      if (totalCell) totalCell.textContent = totalWithGst.toFixed(2);
+    });
+
+    const grandTotalCell = document.getElementById("calculatedSubtotal");
+    if (grandTotalCell) grandTotalCell.textContent = grandTotal.toFixed(2);
+  });
+</script>
+
+</body>
+</html>

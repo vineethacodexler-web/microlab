@@ -1,0 +1,58 @@
+<h2>Stock Management</h2>
+
+{% if message %}
+    <p style="color: green;">{{ message }}</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <label><input type="radio" name="selection_type" value="item" required> Select by Item</label><br>
+    <label><input type="radio" name="selection_type" value="vendor"> Select by Vendor</label><br><br>
+
+    <label for="item_id">Select Item:</label>
+    <select name="item_id" id="item_id">
+        <option value="">-- Choose Item --</option>
+        {% for item in items %}
+            <option value="{{ item.id }}">{{ item.name }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="vendor_id">Select Vendor:</label>
+    <select name="vendor_id" id="vendor_id">
+        <option value="">-- Choose Vendor --</option>
+        {% for vendor in vendors %}
+            <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+        {% endfor %}
+    </select>
+
+    <br><br>
+    <button type="submit">Show Items</button>
+
+    {% if selected_items %}
+        <h3>Items:</h3>
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>Company</th>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Pack Size</th>
+                <th>Stock Balance</th>
+                <th>Quantity to Add</th>
+            </tr>
+            {% for item in selected_items %}
+            <tr>
+                <td>{{ item.company.name }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.pack_size }}</td>
+                <td>{{ item.stock_balance }}</td>
+                <td>
+                    <input type="number" name="quantity_{{ item.id }}" min="1">
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <button type="submit">Update Stock</button>
+    {% endif %}
+</form>

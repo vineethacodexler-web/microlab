@@ -1,0 +1,146 @@
+{% include 'admin_navbar.html' %}
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="topbar d-flex justify-content-between align-items-center mb-3">
+        <h4>Employee Management</h4>
+        <input type="text" id="searchInput" class="form-control w-25" placeholder="Search Employees..." onkeyup="filterTable()">
+    </div>
+
+    <!-- Employee Table -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle shadow-sm rounded" id="employeeTable">
+            <thead class="table-dark text-center">
+                <tr style="background-color: aliceblue; color: black;">
+                    <th>Sl No</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Mobile</th>
+                    <th>Password</th>
+                    <th>Registration Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in view_s %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ leave.First_name }}</td>
+                    <td>{{ leave.Last_name }}</td>
+                    <td>{{ leave.Email }}</td>
+                    <td>{{ leave.Mobile_Number }}</td>
+                    <td>{{ leave.Password }}</td>
+                    <td>{{ leave.Registration_date }}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ leave.id }}">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('{% url 'del_employee' leave.id %}')">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Edit Employee Modals -->
+    {% for leave in view_s %}
+    <div class="modal fade" id="editEmployeeModal{{ leave.id }}" tabindex="-1" aria-labelledby="editEmployeeModalLabel{{ leave.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-3 shadow-sm">
+                <form method="post" enctype="multipart/form-data" action="{% url 'update_employee' %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editEmployeeModalLabel{{ leave.id }}">Edit Employee</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="employee_id" value="{{ leave.id }}">
+
+                        <div class="mb-3">
+                            <label for="first_name{{ leave.id }}" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name{{ leave.id }}" name="first_name" value="{{ leave.First_name }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="last_name{{ leave.id }}" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name{{ leave.id }}" name="last_name" value="{{ leave.Last_name }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="user_name{{ leave.id }}" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="user_name{{ leave.id }}" name="user_name" value="{{ leave.user.username }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email{{ leave.id }}" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email{{ leave.id }}" name="email" value="{{ leave.Email }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="mobile{{ leave.id }}" class="form-label">Mobile</label>
+                            <input type="text" class="form-control" id="mobile{{ leave.id }}" name="mobile" value="{{ leave.Mobile_Number }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="psw{{ leave.id }}" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="psw{{ leave.id }}" name="psw" placeholder="Enter new password">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(deleteUrl) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = deleteUrl;
+            }
+        });
+    }
+
+    function filterTable() {
+        const input = document.getElementById("searchInput").value.toUpperCase();
+        const table = document.getElementById("employeeTable");
+        const trs = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < trs.length; i++) {
+            let found = false;
+            const tds = trs[i].getElementsByTagName("td");
+            for (let j = 0; j < tds.length; j++) {
+                if (tds[j] && tds[j].innerText.toUpperCase().includes(input)) {
+                    found = true;
+                    break;
+                }
+            }
+            trs[i].style.display = found ? "" : "none";
+        }
+    }
+</script>
+
+<!-- Bootstrap & Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,0 +1,197 @@
+{% include 'admin_navbar.html' %}
+<body style="background-color: #edf0f6;">
+
+    <!-- Main Content -->
+    <div class="main-content">
+<!-- Alert Messages -->
+{% if messages %}
+<div id="popup-alert-container" class="popup-alert-container">
+    {% for message in messages %}
+    <div class="popup-alert {% if 'success' in message.tags %}popup-success{% else %}popup-error{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Styles for Popup Alerts -->
+<style>
+.popup-alert-container {
+    position: fixed;
+    top: 20px;
+    left: 45%;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.popup-alert {
+    padding: 12px 20px;
+    border-radius: 5px;
+    color: #fff;
+    min-width: 250px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0.95;
+    animation: fadeout 0.5s ease-in-out forwards;
+    animation-delay: 3s;
+}
+.popup-success { background-color: #28a745; }
+.popup-error { background-color: #dc3545; }
+@keyframes fadeout {
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+    }
+}
+</style>
+
+<!-- JS for Auto-removing Alerts -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const alertContainer = document.getElementById("popup-alert-container");
+    if (alertContainer) {
+        const seen = new Set();
+        const alerts = alertContainer.querySelectorAll(".popup-alert");
+        alerts.forEach(alert => {
+            const text = alert.textContent.trim();
+            if (seen.has(text)) {
+                alert.remove();
+            } else {
+                seen.add(text);
+                setTimeout(() => { alert.remove(); }, 4000);
+            }
+        });
+    }
+});
+</script>
+
+<!-- Main Content -->
+<div >
+    <div class=" d-flex justify-content-between align-items-center">
+        <h4>Branch Management</h4>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBranchModal">+ Add Branch</button>
+    </div>
+<br>
+    <!-- Add/Edit Branch Modal -->
+    <div class="modal fade" id="addBranchModal" tabindex="-1" aria-labelledby="addBranchModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-3 shadow-sm">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addBranchModalLabel">Add Branch</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'branch_create' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" id="location" name="location" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Branch</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Table -->
+    <div class="table-responsive mt-4">
+        <table class="table table-hover align-middle shadow-sm rounded">
+            <thead class="table-dark text-center" style="color:black">
+                <tr>
+                    <th style="background-color: aliceblue;color:black">Sl No</th>
+                    <th style="background-color: aliceblue;color:black">Branch Name</th>
+                    <th style="background-color: aliceblue;color:black">Actions</th>
+                </tr>
+            </thead>
+            <tbody >
+                {% if branches %}
+                    {% for branch in branches|dictsortreversed:"id" %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td>{{ branch.location }}</td>
+                        <td class="text-center">
+                    <!-- Trigger button to open modal wizard -->
+<a href="#" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editBranchModal">
+    <i class="bi bi-pencil-square"></i> Edit
+</a>
+
+<!-- Modal structure -->
+<div class="modal fade" id="editBranchModal" tabindex="-1" aria-labelledby="editBranchModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editBranchModalLabel">Edit Branch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Display location information -->
+        <p><strong>Location:</strong> {{ branch.location }}</p>
+
+        <!-- Form or content for editing branch details goes here -->
+        <form action="{% url 'branch_update' branch.pk %}" method="post">
+          {% csrf_token %}
+          <!-- Example fields for branch update -->
+          <div class="mb-3">
+            <label for="branch_name" class="form-label">Edit Location</label>
+            <input type="text" class="form-control" id="location" name="location" value="{{ branch.location }}">
+          </div>
+          <!-- Add other fields as needed -->
+          
+       
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          
+    </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+                            <form method="post" action="{% url 'branch_delete' branch.pk %}" class="d-inline" id="delete-form-{{ branch.pk }}">
+                                {% csrf_token %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete({{ branch.pk }})">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">No branches found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SweetAlert2 for Delete Confirmation -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDelete(branchId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#dc3545',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + branchId).submit();
+        }
+    });
+}
+</script>
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">

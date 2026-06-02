@@ -1,0 +1,781 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Consumed Purchase Orders</title>
+
+<style>
+:root {
+    --co-navbar-height: 70px;
+    --co-primary: #1f4e8c;
+    --co-bg: #f4f7fb;
+    --co-border: #e5e7eb;
+}
+
+body {
+    margin: 0;
+    background: var(--co-bg);
+    font-size: 13px;
+    color: #1f2937;
+    overflow-x: hidden;
+}
+
+.consumed-navbar-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+    background: #fff;
+    box-shadow: 0 3px 14px rgba(15, 23, 42, 0.08);
+}
+
+.consumed-page-wrapper {
+    padding: 12px 14px 22px;
+}
+
+.sticky-filter-bar {
+    position: sticky;
+    top: var(--co-navbar-height);
+    z-index: 1080;
+    background: #fff;
+    padding: 12px;
+    border: 1px solid var(--co-border);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.07);
+    margin-bottom: 12px;
+}
+
+.consumed-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.sticky-filter-bar label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 3px;
+}
+
+.form-control-sm,
+.form-select-sm {
+    min-height: 30px;
+    font-size: 11.5px;
+    border-radius: 8px;
+    border: 1px solid #dbe3ef;
+    box-shadow: none !important;
+}
+
+.btn {
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 6px 11px;
+    line-height: 1.2;
+}
+
+.filter-note {
+    font-size: 11px;
+    color: #64748b;
+    padding-top: 4px;
+}
+
+.consumed-table-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 8px;
+    border: 1px solid var(--co-border);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+.table-responsive {
+    max-height: calc(100vh - 250px);
+    overflow: auto;
+    border-radius: 12px;
+}
+
+#ordersTable {
+    margin-bottom: 0;
+    white-space: nowrap;
+    width: 100%;
+}
+
+#ordersTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--co-primary);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 8px 6px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#ordersTable td {
+    font-size: 12px;
+    padding: 7px 6px;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    color: #334155;
+}
+
+#ordersTable tbody tr.co-group-even td {
+    background: #fff;
+}
+
+#ordersTable tbody tr.co-group-odd td {
+    background: #f3f8ff;
+}
+
+#ordersTable tbody tr:hover td {
+    background: #edf5ff !important;
+}
+
+#ordersTable tbody tr.selected-export-row td {
+    background: #fff7d6 !important;
+}
+
+#ordersTable tfoot th {
+    position: sticky;
+    bottom: 0;
+    z-index: 25;
+    background: #f1f5f9 !important;
+    font-size: 11px;
+    font-weight: 800;
+    color: #0f172a;
+    padding: 8px 6px;
+}
+
+.text-end {
+    text-align: right !important;
+}
+
+.action-btn {
+    width: 29px;
+    height: 29px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    padding: 0 !important;
+}
+
+.form-check-input {
+    width: 13px;
+    height: 13px;
+    cursor: pointer;
+}
+
+.empty-row {
+    height: 90px;
+    font-size: 13px !important;
+    color: #64748b !important;
+    background: #fff !important;
+}
+
+.custom-date {
+    display: none;
+}
+
+.pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.page-link {
+    font-size: 12px;
+    border-radius: 8px;
+    border: 1px solid #dbe3ef;
+    color: var(--co-primary);
+}
+
+.page-item.active .page-link {
+    background: var(--co-primary);
+    border-color: var(--co-primary);
+}
+
+/* SweetAlert fix */
+.swal2-container {
+    z-index: 99999 !important;
+}
+
+.swal2-popup {
+    width: 420px !important;
+    max-width: 90vw !important;
+    padding: 22px 24px !important;
+    border-radius: 12px !important;
+}
+
+.swal2-icon {
+    width: 70px !important;
+    height: 70px !important;
+    margin: 5px auto 18px !important;
+}
+
+.swal2-title {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    padding: 0 !important;
+}
+
+.swal2-html-container {
+    font-size: 15px !important;
+    margin: 12px 0 18px !important;
+}
+
+.swal2-actions {
+    gap: 8px !important;
+}
+
+.swal2-confirm,
+.swal2-cancel {
+    font-size: 13px !important;
+    padding: 9px 16px !important;
+    border-radius: 6px !important;
+}
+
+@media (max-width: 991px) {
+    :root {
+        --co-navbar-height: 60px;
+    }
+
+    .co-filter-actions,
+    .co-export-actions {
+        width: 100%;
+    }
+
+    .co-filter-actions .btn,
+    .co-export-actions .btn {
+        flex: 1;
+    }
+
+    .table-responsive {
+        max-height: calc(100vh - 300px);
+    }
+}
+
+@media (max-width: 576px) {
+    :root {
+        --co-navbar-height: 58px;
+    }
+
+    .consumed-page-wrapper {
+        padding: 8px;
+    }
+
+    .sticky-filter-bar {
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .consumed-title {
+        font-size: 15px;
+    }
+
+    .consumed-table-card {
+        padding: 5px;
+    }
+
+    #ordersTable thead th,
+    #ordersTable td {
+        font-size: 9.5px;
+        padding: 5px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+{% include 'links.html' %}
+
+<div class="consumed-navbar-wrap">
+    {% include 'navbar3.html' %}
+</div>
+
+<div class="consumed-page-wrapper">
+
+    <div class="sticky-filter-bar">
+        <h5 class="consumed-title">Consumed Orders</h5>
+
+        <form method="get" action="{% url 'custom_consumed' %}" class="row g-2 align-items-end">
+
+            <div class="col-lg-auto col-md-3 col-6">
+                <label>Per Page</label>
+                <select id="entriesSelect" class="form-select form-select-sm">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-3 col-6">
+                <label>Vendor</label>
+                <select name="vendor" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for vendor in vendors %}
+                    <option value="{{ vendor.name }}" {% if request.GET.vendor == vendor.name %}selected{% endif %}>
+                        {{ vendor.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-3 col-6">
+                <label>Item</label>
+                <select name="item" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for item in items %}
+                    <option value="{{ item.name }}" {% if request.GET.item == item.name %}selected{% endif %}>
+                        {{ item.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-lg-auto col-md-3 col-6">
+                <label>Date</label>
+                <select name="filter" id="filterType" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    <option value="daily" {% if filter_type == "daily" %}selected{% endif %}>Today</option>
+                    <option value="weekly" {% if filter_type == "weekly" %}selected{% endif %}>This Week</option>
+                    <option value="monthly" {% if filter_type == "monthly" %}selected{% endif %}>This Month</option>
+                    <option value="yearly" {% if filter_type == "yearly" %}selected{% endif %}>This Year</option>
+                    <option value="custom" {% if filter_type == "custom" %}selected{% endif %}>Custom</option>
+                </select>
+            </div>
+
+            <div class="col-lg-auto col-md-6 col-12 custom-date">
+                <label>From</label>
+                <input type="date" name="start_date" value="{{ request.GET.start_date }}" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-lg-auto col-md-6 col-12 custom-date">
+                <label>To</label>
+                <input type="date" name="end_date" value="{{ request.GET.end_date }}" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-lg-auto col-md-6 col-12">
+                <div class="d-flex gap-2 co-filter-actions">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-filter me-1"></i> Apply
+                    </button>
+
+                    <a href="{% url 'custom_consumed' %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-rotate-left me-1"></i> Clear
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-auto col-md-12 ms-lg-auto col-12">
+                <div class="d-flex gap-2 co-export-actions justify-content-lg-end">
+                    <button type="button" onclick="bulkDelete()" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash me-1"></i> Delete
+                    </button>
+
+                    <button type="button" onclick="exportToExcel()" class="btn btn-success btn-sm">
+                        <i class="fas fa-file-excel me-1"></i> Excel
+                    </button>
+
+                    <button type="button" onclick="exportToPDF()" class="btn btn-danger btn-sm">
+                        <i class="fas fa-file-pdf me-1"></i> PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="filter-note">
+                    Vendor: {% if request.GET.vendor %}{{ request.GET.vendor }}{% else %}All{% endif %} |
+                    Item: {% if request.GET.item %}{{ request.GET.item }}{% else %}All{% endif %} |
+                    Date: {% if filter_type %}{{ filter_type }}{% else %}All{% endif %}
+                    {% if filter_type == "custom" %}
+                    | From: {{ request.GET.start_date }} To: {{ request.GET.end_date }}
+                    {% endif %}
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="consumed-table-card">
+        <div class="table-responsive">
+
+            <form id="bulkDeleteForm" method="post" action="{% url 'bulk_delete_consumed_orders' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ query_string }}">
+
+                <table class="table table-bordered table-sm align-middle" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                            </th>
+                            <th>Date</th>
+                            <th>Vendor</th>
+                            <th>Company</th>
+                            <th>Item</th>
+                            <th>Pack</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-end">Stock</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for order in consumed_orders|dictsortreversed:"id" %}
+                        {% cycle 'co-group-even' 'co-group-odd' as co_group_class silent %}
+                        {% with line_count=order.consumed_lines.count %}
+
+                        {% if line_count > 0 %}
+                            {% for line in order.consumed_lines.all %}
+                            <tr data-order-id="{{ order.id }}" class="{{ co_group_class }}">
+
+                                {% if forloop.first %}
+                                <td rowspan="{{ line_count }}">
+                                    <input type="checkbox"
+                                           name="selected_orders"
+                                           value="{{ order.id }}"
+                                           class="rowCheckbox form-check-input">
+                                </td>
+
+                                <td rowspan="{{ line_count }}">{{ order.dateField|date:"Y-m-d" }}</td>
+                                {% endif %}
+
+                                <td>{{ line.item.vendor.name|default:"-" }}</td>
+                                <td>{{ line.item.company_name|default:"-" }}</td>
+                                <td>{{ line.item.name|default:"-" }}</td>
+                                <td>{{ line.item.pack_size|default:"-" }}</td>
+                                <td class="text-end">{{ line.price|default:"0.00" }}</td>
+                                <td class="text-end">{{ line.item.stock_balance|default:"0" }}</td>
+                                <td class="qty text-end">{{ line.qty|default:"0" }}</td>
+                                <td class="amount text-end">{{ line.amount|default:"0.00" }}</td>
+
+                                {% if forloop.first %}
+                                <td rowspan="{{ line_count }}">
+                                    <a href="{% url 'update_consumed_order' order.id %}?{{ query_string }}"
+                                       class="btn btn-primary btn-sm action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                                {% endif %}
+
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+
+                        {% endwith %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="11" class="text-center empty-row">
+                                <i class="fa-regular fa-folder-open me-2"></i>
+                                No records found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <th colspan="8" class="text-end">Grand Total:</th>
+                            <th id="totalQty" class="text-end" style="font-size: 12px;">0</th>
+                            <th id="totalAmount"style="font-size: 12px;" class="text-end">0.00</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </form>
+
+        </div>
+    </div>
+
+    <nav class="mt-3">
+        <ul class="pagination">
+            <li class="page-item active">
+                <a class="page-link" href="#">1</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const filterType = document.getElementById("filterType");
+    const customFields = document.querySelectorAll(".custom-date");
+    const entriesSelect = document.getElementById("entriesSelect");
+    const selectAll = document.getElementById("selectAll");
+
+    function toggleCustom() {
+        customFields.forEach(el => {
+            el.style.display = filterType && filterType.value === "custom" ? "block" : "none";
+        });
+    }
+
+    if (filterType) {
+        toggleCustom();
+        filterType.addEventListener("change", toggleCustom);
+    }
+
+    const saved = localStorage.getItem("consumed_entries");
+    if (saved && entriesSelect) {
+        entriesSelect.value = saved;
+    }
+
+    function updateTotals() {
+        let totalQty = 0;
+        let totalAmount = 0;
+
+        document.querySelectorAll("#ordersTable tbody tr[data-order-id]").forEach(row => {
+            if (row.style.display === "none") return;
+
+            totalQty += parseFloat(row.querySelector(".qty")?.innerText.replace(/,/g, "")) || 0;
+            totalAmount += parseFloat(row.querySelector(".amount")?.innerText.replace(/,/g, "")) || 0;
+        });
+
+        document.getElementById("totalQty").innerText = totalQty.toFixed(0);
+        document.getElementById("totalAmount").innerText = totalAmount.toFixed(2);
+    }
+
+    function applyLimit() {
+        const limit = entriesSelect ? entriesSelect.value : "all";
+        const orderGroups = {};
+
+        document.querySelectorAll("#ordersTable tbody tr[data-order-id]").forEach(row => {
+            const orderId = row.dataset.orderId;
+            if (!orderGroups[orderId]) orderGroups[orderId] = [];
+            orderGroups[orderId].push(row);
+        });
+
+        Object.keys(orderGroups).forEach((orderId, index) => {
+            const show = limit === "all" || index < parseInt(limit);
+            orderGroups[orderId].forEach(row => {
+                row.style.display = show ? "" : "none";
+            });
+        });
+
+        updateTotals();
+    }
+
+    if (entriesSelect) {
+        entriesSelect.addEventListener("change", function () {
+            localStorage.setItem("consumed_entries", this.value);
+            applyLimit();
+        });
+    }
+
+    applyLimit();
+
+    if (selectAll) {
+        selectAll.addEventListener("change", function () {
+            document.querySelectorAll(".rowCheckbox").forEach(cb => {
+                cb.checked = this.checked;
+                toggleSelectedRows(cb.value, cb.checked);
+            });
+        });
+    }
+
+    document.querySelectorAll(".rowCheckbox").forEach(cb => {
+        cb.addEventListener("change", function () {
+            toggleSelectedRows(this.value, this.checked);
+            updateSelectAllStatus();
+        });
+    });
+});
+
+function toggleSelectedRows(orderId, checked) {
+    document.querySelectorAll(`#ordersTable tbody tr[data-order-id="${orderId}"]`).forEach(row => {
+        row.classList.toggle("selected-export-row", checked);
+    });
+}
+
+function updateSelectAllStatus() {
+    const all = document.querySelectorAll(".rowCheckbox");
+    const checked = document.querySelectorAll(".rowCheckbox:checked");
+    const selectAll = document.getElementById("selectAll");
+
+    if (selectAll) {
+        selectAll.checked = all.length > 0 && all.length === checked.length;
+    }
+}
+
+function getExportData() {
+    let body = [];
+    let currentDate = "";
+    let exportOrder = false;
+
+    document.querySelectorAll("#ordersTable tbody tr[data-order-id]").forEach(row => {
+        if (row.style.display === "none") return;
+
+        const cols = row.querySelectorAll("td");
+        if (cols.length === 0) return;
+
+        const checkbox = row.querySelector(".rowCheckbox");
+
+        let vendor, company, item, pack, price, stock, qty, amount;
+
+        if (checkbox) {
+            exportOrder = checkbox.checked;
+            if (!exportOrder) return;
+
+            currentDate = cols[1].innerText.trim();
+
+            vendor  = cols[2].innerText.trim();
+            company = cols[3].innerText.trim();
+            item    = cols[4].innerText.trim();
+            pack    = cols[5].innerText.trim();
+            price   = cols[6].innerText.trim();
+            stock   = cols[7].innerText.trim();
+            qty     = cols[8].innerText.trim();
+            amount  = cols[9].innerText.trim();
+        } else {
+            if (!exportOrder) return;
+
+            vendor  = cols[0].innerText.trim();
+            company = cols[1].innerText.trim();
+            item    = cols[2].innerText.trim();
+            pack    = cols[3].innerText.trim();
+            price   = cols[4].innerText.trim();
+            stock   = cols[5].innerText.trim();
+            qty     = cols[6].innerText.trim();
+            amount  = cols[7].innerText.trim();
+        }
+
+        body.push([
+            currentDate,
+            vendor,
+            company,
+            item,
+            pack,
+            price,
+            stock,
+            qty,
+            amount
+        ]);
+    });
+
+    if (body.length > 0) {
+        body.push([
+            "", "", "", "", "", "", "TOTAL",
+            document.getElementById("totalQty").innerText,
+            document.getElementById("totalAmount").innerText
+        ]);
+    }
+
+    return body;
+}
+
+function exportToExcel() {
+    const body = getExportData();
+
+    if (body.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "No Data Selected",
+            text: "Please select at least one order to export."
+        });
+        return;
+    }
+
+    const data = [
+        ["Date", "Vendor", "Company", "Item", "Pack Size", "Price", "Stock", "Qty", "Amount"],
+        ...body
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    XLSX.utils.book_append_sheet(wb, ws, "Consumed Orders");
+    XLSX.writeFile(wb, "Selected_Consumed_Orders.xlsx");
+}
+
+function exportToPDF() {
+    const body = getExportData();
+
+    if (body.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "No Data Selected",
+            text: "Please select at least one order to export."
+        });
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("landscape");
+
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Consumed Orders", 40, 25);
+
+    doc.autoTable({
+        head: [["Date", "Vendor", "Company", "Item", "Pack Size", "Price", "Stock", "Qty", "Amount"]],
+        body: body,
+        startY: 40,
+        styles: {
+            fontSize: 8,
+            cellPadding: 3
+        },
+        headStyles: {
+            fillColor: [31, 78, 140],
+            textColor: 255,
+            fontStyle: "bold"
+        },
+        alternateRowStyles: {
+            fillColor: [245, 249, 255]
+        }
+    });
+
+    doc.save("Selected_Consumed_Orders.pdf");
+}
+
+function bulkDelete() {
+    const selected = document.querySelectorAll(".rowCheckbox:checked");
+
+    if (selected.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "No Orders Selected",
+            text: "Please select at least one order to delete."
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Selected orders will be permanently deleted!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, Delete",
+        cancelButtonText: "Cancel",
+        width: 420
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: "Deleting...",
+                text: "Please wait",
+                allowOutsideClick: false,
+                width: 360,
+                didOpen: () => {
+                    Swal.showLoading();
+                    document.getElementById("bulkDeleteForm").submit();
+                }
+            });
+        }
+    });
+}
+</script>
+
+</body>
+</html>

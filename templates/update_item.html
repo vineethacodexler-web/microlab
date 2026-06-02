@@ -1,0 +1,464 @@
+{% include 'navbar3.html' %}
+{% include 'links.html' %}
+
+<title>Update Item</title>
+
+<style>
+
+    *{
+        box-sizing: border-box;
+    }
+
+    body{
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    }
+
+    /* MAIN CONTENT */
+    .main-content{
+        width: 100%;
+        padding: 15px 20px 20px;
+    }
+
+    /* FULL SCREEN CONTAINER */
+    .full-page-form{
+        width: 100%;
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    /* HEADER */
+    .page-header{
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e5e7eb;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .page-header h2{
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 10px 0 4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        line-height: 1.2;
+    }
+
+    .page-header p{
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    /* FORM */
+    form{
+        width: 100%;
+        margin: 0;
+    }
+
+    /* GRID */
+    .form-grid{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        width: 100%;
+    }
+
+    .form-group{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .form-group label{
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select{
+        width: 100%;
+        height: 44px;
+        border: 1px solid #dbe3ef;
+        border-radius: 12px;
+        background: #f8fafc;
+        padding: 0 14px;
+        font-size: 14px;
+        color: #0f172a;
+        transition: all 0.25s ease;
+        outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus{
+        border-color: #2563eb;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+    }
+
+    .form-group input[readonly]{
+        background: #e2e8f0;
+        cursor: not-allowed;
+        color: #64748b;
+    }
+
+    /* BUTTON AREA */
+    .button-area{
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .btn-modern{
+        border: none;
+        padding: 11px 22px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.25s ease;
+        text-decoration: none;
+    }
+
+    .btn-update{
+        background: linear-gradient(135deg,#2563eb,#1d4ed8);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(37,99,235,0.20);
+    }
+
+    .btn-update:hover{
+        transform: translateY(-2px);
+    }
+
+    .btn-clear{
+        background: #e5e7eb;
+        color: #111827;
+    }
+
+    .btn-clear:hover{
+        background: #d1d5db;
+    }
+
+    .btn-back{
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .btn-back:hover{
+        background: #bae6fd;
+    }
+
+    /* RESPONSIVE */
+    @media(max-width:1200px){
+        .form-grid{
+            grid-template-columns: repeat(3,1fr);
+        }
+    }
+
+    @media(max-width:992px){
+        .form-grid{
+            grid-template-columns: repeat(2,1fr);
+        }
+    }
+
+    @media(max-width:576px){
+
+        .main-content{
+            padding: 80px 12px 15px;
+        }
+
+        .full-page-form{
+            padding: 12px;
+        }
+
+        .page-header{
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+        }
+
+        .page-header h2{
+            font-size: 20px;
+        }
+
+        .form-grid{
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .button-area{
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .btn-modern{
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+</style>
+
+<div class="main-content">
+
+    <div class="full-page-form">
+
+        <!-- HEADER -->
+        <div class="page-header">
+
+            <div>
+              <button type="button"
+              class="btn-modern btn-back"
+              onclick="window.location.href='{% url 'item_list' %}'">
+
+          <i class="fa-solid fa-arrow-left"></i>
+          Back
+      </button>
+      <br>  <br>
+                <h2>
+                    <i class="fa-solid fa-file-invoice"></i>
+                    Update Item
+                </h2>
+
+                <p>
+                    Manage and update Item details
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- FORM -->
+        <form method="post"
+              enctype="multipart/form-data"
+              action="{% url 'item_update' item.id %}">
+
+            {% csrf_token %}
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="name">Item Name</label>
+
+                    <input type="text"
+                           id="name"
+                           name="name"
+                           value="{{ item.name }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="company_name">Company Name</label>
+
+                    <input type="text"
+                           id="company_name"
+                           name="company_name"
+                           value="{{ item.company_name }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="hsn">HSN</label>
+
+                    <input type="text"
+                           id="hsn"
+                           name="hsn"
+                           value="{{ item.hsn }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="vendor">Vendor</label>
+
+                    <select id="vendor" name="vendor" required>
+
+                        {% for vendor in vendors %}
+
+                        <option value="{{ vendor.id }}"
+                            {% if vendor.id == item.vendor.id %}selected{% endif %}>
+
+                            {{ vendor.name }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="pack_size">Pack Size</label>
+
+                    <input type="text"
+                           id="pack_size"
+                           name="pack_size"
+                           value="{{ item.pack_size }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="item_price">Item Price</label>
+
+                    <input type="number"
+                           step="0.01"
+                           id="item_price"
+                           name="item_price"
+                           value="{{ item.item_price }}"
+                           {% if bok.edit_allowed == "False" %}readonly{% endif %}
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="gst">GST</label>
+
+                    <input type="number"
+                           id="gst"
+                           name="gst"
+                           value="{{ item.gst }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="stock_balance">Quantity</label>
+
+                    <input type="text"
+                           id="stock_balance"
+                           name="stock_balance"
+                           value="{{ item.stock_balance }}"
+                           required>
+                </div>
+
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="button-area">
+
+                <button type="submit" class="btn-modern btn-update">
+                    <i class="fa-solid fa-check"></i>
+                    Update Item
+                </button>
+
+                <button type="reset" class="btn-modern btn-clear">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    Clear
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div><style>
+
+    /* REMOVE EXTRA GAP FROM BODY */
+    body.ml-navbar-page{
+        padding-top: 72px !important;
+        margin: 0;
+    }
+
+    /* TOP BAR */
+    .ml-top-support-bar{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 34px;
+        min-height: 34px;
+        padding: 0 18px;
+        margin: 0;
+        z-index: 1050;
+    }
+
+    /* NAVBAR */
+    .ml-navbar-horizontal{
+        position: fixed;
+        top: 34px;
+        left: 0;
+        width: 100%;
+        min-height: 56px;
+        padding: 4px 18px;
+        margin: 0;
+        z-index: 1040;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* REMOVE GAP INSIDE NAVBAR */
+    .ml-navbar-horizontal .container,
+    .ml-navbar-horizontal .container-fluid{
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* LOGO */
+    .ml-navbar-brand{
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .ml-navbar-brand img{
+        height: 36px;
+        width: auto;
+        object-fit: contain;
+        display: block;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* NAV LINKS */
+    .ml-navbar-horizontal .navbar-nav{
+        gap: 2px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .ml-navbar-horizontal .nav-link{
+        padding: 8px 10px !important;
+        margin: 0;
+        font-size: 13px;
+    }
+
+    /* MOBILE */
+    @media(max-width:576px){
+
+        body.ml-navbar-page{
+            padding-top: 88px !important;
+        }
+
+        .ml-top-support-bar{
+            height: 42px;
+            min-height: 42px;
+            padding: 4px 10px;
+        }
+
+        .ml-navbar-horizontal{
+            top: 42px;
+            min-height: 50px;
+            padding: 4px 10px;
+        }
+
+        .ml-navbar-brand img{
+            height: 30px;
+        }
+
+    }
+
+</style>

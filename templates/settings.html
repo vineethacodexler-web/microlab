@@ -1,0 +1,141 @@
+
+  {% include 'nav.html' %}
+  <div class="content" id="content" style="padding:15px;">
+
+    <br><br>
+    <br>
+        <h4 class="o_setting_title">GST Settings</h4>
+    
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px;">
+        <h3>Enable/Disable GST</h3>
+        <p>Toggle GST calculation for your transactions. Enable GST if you want the system to calculate tax on sales.</p>
+        
+        <form method="post" action="{% url 'enable_setting_gst' %}" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <label class="o_switch">
+                <input type="checkbox" name="enable_setting_gst" value="True" 
+                {% if gstsetting %}checked{% endif %} required>
+            
+            <span class="o_switch_slider round">   
+                Enable GST for transactions and invoicing.
+            </span>
+            <br>
+            <button type="submit" class="btn btn-primary mt-4" >Save Setting </button>
+  
+        </form>
+    </div>
+
+
+
+    <div class="o_setting_box o_group" >
+        <div class="o_setting_left_pane" >
+            <h4 class="o_setting_title">Close Financial Year</h4>
+         
+        </div>
+        <div class="container">
+            <div class="row">
+                <!-- Backup and Restore Section -->
+                <div class="col-md-6">
+                    <div class="border p-4 mb-4">
+                        <h3>Backup Data</h3>
+                        <p>Click the button below to create a backup of your data. This will allow you to restore it later if needed.</p>
+                        <form action="{% url 'backup_data' %}" method="GET">
+                            <button type="submit" class="btn btn-primary mt-2">Backup Data</button>
+                        </form>
+                        
+                        <h3 class="mt-4">Restore Backup</h3>
+                        <p>Upload a backup file to restore your data. Ensure the file is in the correct format before proceeding.</p>
+                        <form action="{% url 'restore_backup' %}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="file" name="backup_file" id="backup_file" class="form-control" required>
+                            <button type="submit" class="btn btn-primary mt-2">Upload and Restore</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Clear Data Section -->
+                <div class="col-md-6">
+                    <div class="border p-4 mb-4">
+                        <h3 class="text-danger">Clear All Data</h3>
+                        <p><strong>Warning:</strong> This will permanently delete all data. Proceed with caution.</p>
+                        <form id="clearDataForm" action="{% url 'clear_data' %}" method="POST">
+                            {% csrf_token %}
+                            <button type="button" id="clearDataBtn" class="btn btn-danger">Clear All Data</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById("clearDataBtn").addEventListener("click", function () {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This action will permanently delete all data!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, clear all!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById("clearDataForm").submit();
+                }
+            });
+        });
+    </script>
+    
+</div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+
+        .qr-code {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .odoo-logo {
+            width: 40px;
+            height: auto;
+        }
+        ul {
+            padding-left: 15px;
+        }
+        ul li {
+            margin-bottom: 8px;
+        }
+    </style>
+
+  
+        <h2>Developer Contact</h2>
+
+    <hr>
+
+    <ul>
+        <img src="static/myqr.png" alt="Logo">
+        <li><strong>Version:</strong> 15.0</li>
+        <li><strong>Installed Modules:</strong> Sales, Purchase, Inventory, CRM, Accounting, Reports</li>
+    </ul>
+
+
+
+    
+</div>
+
+<script>
+    // Update server time dynamically
+    document.getElementById('server-time').innerText = new Date().toLocaleString();
+</script>
+
+
+  <!-- Include Bootstrap JS and Popper.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+
+
+</body>
+</html>
+

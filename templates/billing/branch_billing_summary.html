@@ -1,0 +1,58 @@
+{% include 'admin_navbar.html' %}
+
+<div class="main-content">
+
+    <div class="card">
+
+        <div class="card-header">
+            Branch Billing Summary
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+
+                <thead>
+                    <tr>
+                        <th>Branch Name</th>
+                        <th>Total Due</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for item in branch_data %}
+
+                    <tr>
+
+                        <td>
+                            {{ item.branch.registration.First_name }}
+                        </td>
+
+                        <td>
+                            ₹ {{ item.total_due }}
+                        </td>
+
+                        <td>
+
+                            <a href="{% url 'branch_billing_detail' item.branch.id %}"
+   class="btn btn-primary btn-sm">
+    View Details
+</a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

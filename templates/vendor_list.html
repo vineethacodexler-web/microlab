@@ -1,0 +1,882 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <title>Vendors</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f4f7fb;
+      font-family: "Segoe UI", sans-serif;
+      color: #1f2937;
+    }
+
+    .vendor-wrapper {
+      padding: 0px;
+    }
+
+    .vendor-card {
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+      border: 1px solid #eef2f7;
+      overflow: hidden;
+    }
+
+    .vendor-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid #eef2f7;
+      background: linear-gradient(135deg, #ffffff, #f8fbff);
+    }
+
+    .vendor-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+
+    .vendor-subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .filter-card {
+      padding: 15px 20px;
+      background: #ffffff;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 11px;
+      font-size: 13px;
+      border-color: #dbe4f0;
+      height: 38px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 .18rem rgba(13, 110, 253, .12);
+    }
+
+    .btn {
+      border-radius: 11px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 12px;
+    }
+
+    .btn-sm {
+      padding: 7px 11px;
+      font-size: 12px;
+    }
+
+    .table-area {
+      padding: 18px 20px 20px;
+    }
+
+    .table-responsive {
+      border-radius: 15px;
+      border: 1px solid #eef2f7;
+      overflow-x: auto;
+    }
+
+    .table {
+      margin-bottom: 0;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      vertical-align: middle !important;
+      white-space: nowrap;
+    }
+
+    .table thead th {
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-size: 12px;
+            font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+
+      border-bottom: 1px solid #dbeafe;
+      padding: 12px 10px;
+    }
+
+    .table tbody td {
+      padding: 11px 10px;
+      color: #334155;
+      font-size: 12px;
+            font-weight: bold;
+      border-color: #eef2f7;
+    }
+
+    .table tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    .vendor-name {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .address-cell {
+      max-width: 260px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: thin;
+    }
+
+    .action-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      transition: 0.2s ease;
+    }
+
+    .edit-btn {
+      color: #0d6efd;
+      background: #eaf2ff;
+    }
+
+    .edit-btn:hover {
+      background: #0d6efd;
+      color: #ffffff;
+    }
+
+    .delete-btn {
+      color: #dc3545;
+      background: #fff1f2;
+    }
+
+    .delete-btn:hover {
+      background: #dc3545;
+      color: #ffffff;
+    }
+
+    .count-badge {
+      background: #f1f5f9;
+      color: #334155;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 12px;
+    }
+
+    .pagination .page-link {
+      border-radius: 9px;
+      margin: 0 2px;
+      font-size: 13px;
+      color: #0d6efd;
+    }
+
+    .pagination .active .page-link {
+      color: #ffffff;
+    }
+
+    .modal-content {
+      border: none;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .modal-title {
+      font-weight: 700;
+    }
+
+    .form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    @media (max-width: 768px) {
+      .vendor-wrapper {
+        padding: 12px;
+      }
+
+      .vendor-header,
+      .filter-card,
+      .table-area {
+        padding: 14px;
+      }
+
+      .btn,
+      .form-control,
+      .form-select {
+        width: 100%;
+      }
+
+      .mobile-full {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+{% include 'navbar3.html' %}
+
+<div class="container-fluid vendor-wrapper">
+
+  <div class="vendor-card">
+
+    <div class="vendor-header">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h5 class="vendor-title">Vendors</h5>
+
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <form id="excelForm" enctype="multipart/form-data" class="m-0">
+            {% csrf_token %}
+            <input type="file" name="excel_file" id="excel_file" style="display:none;" required>
+
+            <button type="button" class="btn btn-success btn-sm" onclick="document.getElementById('excel_file').click();">
+              <i class="bi bi-file-earmark-excel"></i> Import Excel
+            </button>
+          </form>
+
+          <button type="button" class="btn btn-outline-success btn-sm" onclick="exportVendorsToExcel()">
+            <i class="bi bi-file-earmark-excel"></i> Export Excel
+          </button>
+
+          <button type="button" class="btn btn-outline-dark btn-sm" onclick="exportVendorsToPDF()">
+            <i class="bi bi-file-earmark-pdf"></i> Export PDF
+          </button>
+
+          <button type="button" class="btn btn-outline-danger btn-sm" onclick="bulkDeleteVendors()">
+            <i class="bi bi-trash"></i> Delete Selected
+          </button>
+
+          <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addVendorModal">
+            <i class="bi bi-plus-circle"></i> New Vendor
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="filter-card py-2 px-3">
+      <form method="get" id="filterForm">
+  
+          <div class="row gx-2 gy-1 align-items-end">
+  
+              <!-- Search -->
+              <div class="col-lg-3 col-md-4 col-12">
+                  <label class="form-label small fw-semibold mb-1">
+                      Search
+                  </label>
+  
+                  <input
+                      type="text"
+                      name="search"
+                      value="{{ search }}"
+                      class="form-control form-control-sm shadow-none custom-input"
+                      placeholder="Search vendors..."
+                  >
+              </div>
+  
+              <!-- Entries -->
+              <div class="col-auto entries-box">
+                  <label class="form-label small fw-semibold mb-1">
+                      Entries
+                  </label>
+  
+                  <select
+                      name="per_page"
+                      class="form-select form-select-sm shadow-none custom-select"
+                      onchange="this.form.submit()"
+                  >
+                      {% for entry in entries_options %}
+                          <option value="{{ entry }}" {% if per_page == entry %}selected{% endif %}>
+                              {% if entry == "all" %}
+                                  All
+                              {% else %}
+                                  {{ entry }}
+                              {% endif %}
+                          </option>
+                      {% endfor %}
+                  </select>
+              </div>
+  
+              <!-- Sort -->
+              <div class="col-auto sort-box">
+                  <label class="form-label small fw-semibold mb-1">
+                      Sort By
+                  </label>
+  
+                  <select
+                      name="sort_by"
+                      class="form-select form-select-sm shadow-none custom-select"
+                      onchange="this.form.submit()"
+                  >
+                      <option value="-id" {% if sort_by == "-id" %}selected{% endif %}>
+                          Newest
+                      </option>
+  
+                      <option value="oldest" {% if sort_by == "oldest" %}selected{% endif %}>
+                          Oldest
+                      </option>
+  
+                      <option value="name_asc" {% if sort_by == "name_asc" %}selected{% endif %}>
+                          A - Z
+                      </option>
+  
+                      <option value="name_desc" {% if sort_by == "name_desc" %}selected{% endif %}>
+                          Z - A
+                      </option>
+                  </select>
+              </div>
+  
+              <!-- Buttons -->
+              <div class="col">
+                  <div class="d-flex gap-1 flex-wrap align-items-center mt-md-0 mt-1">
+  
+                      <button type="submit" class="btn btn-primary btn-sm filter-btn">
+                          <i class="bi bi-funnel"></i> Apply Filter
+                      </button>
+  
+                      <a href="{% url 'vendor_list' %}" class="btn btn-outline-secondary btn-sm filter-btn">
+                          <i class="bi bi-arrow-clockwise"></i> Clear Filter
+                      </a>
+  
+                      <span class="count-badge small">
+                          {{ showing_count }}/{{ total_count }}
+                      </span>
+  
+                  </div>
+              </div>
+  
+          </div>
+  
+      </form>
+  </div>
+  <style>
+    .filter-card {
+    background: #fff;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.form-label {
+    font-size: 10px;
+    margin-bottom: 2px !important;
+    color: #475569;
+}
+
+.custom-input {
+    height: 28px !important;
+    min-height: 28px !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+}
+
+.custom-select {
+    height: 28px !important;
+    min-height: 28px !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
+    padding: 2px 22px 2px 8px !important;
+    line-height: 1.1 !important;
+}
+
+.entries-box {
+    width: 78px;
+}
+
+.sort-box {
+    width: 115px;
+}
+
+.filter-btn {
+    height: 28px;
+    min-height: 28px;
+    padding: 3px 10px;
+    font-size: 11px;
+    border-radius: 6px;
+}
+
+.count-badge {
+    background: #f1f5f9;
+    color: #334155;
+    border-radius: 30px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 600;
+}
+  </style>
+
+    <div class="table-area">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="vendorTable">
+          <thead>
+            <tr>
+              <th class="text-center">
+                <input type="checkbox" id="selectAllVendors" class="form-check-input">
+              </th>
+              <th>Sl</th>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Email</th>
+              <th>Address</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for vendor in vendors %}
+            <tr>
+              <td class="text-center">
+                <input type="checkbox" class="vendorCheckbox form-check-input" value="{{ vendor.id }}">
+              </td>
+
+              <td>
+                {% if page_obj %}
+                  {{ page_obj.start_index|add:forloop.counter0 }}
+                {% else %}
+                  {{ forloop.counter }}
+                {% endif %}
+              </td>
+
+              <td>
+                <span class="vendor-name">{{ vendor.name }}</span>
+              </td>
+
+              <td>
+                <i class="bi bi-telephone text-primary me-1"></i>
+                {{ vendor.mobile_number }}
+              </td>
+
+              <td>
+                <i class="bi bi-envelope text-secondary me-1"></i>
+                {{ vendor.email }}
+              </td>
+
+              <td>
+                <div class="address-cell">
+                  <i class="bi bi-geo-alt text-danger me-1"></i>
+                  {{ vendor.address }}
+                </div>
+              </td>
+
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-2">
+                  <a href="{% url 'vendor_update' vendor.id %}" class="action-btn edit-btn" title="Edit Vendor">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+
+                  <form method="post" action="{% url 'vendor_delete' vendor.id %}" id="delete-form-{{ vendor.id }}" class="m-0">
+                    {% csrf_token %}
+                    <button type="button" class="action-btn delete-btn" onclick="confirmDeleteVendor({{ vendor.id }})" title="Delete Vendor">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center py-4 text-muted">
+                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                No vendors found
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if page_obj %}
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+        <div class="text-muted small">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </div>
+
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1&{{ query_params }}">First</a>
+              </li>
+
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ query_params }}">Previous</a>
+              </li>
+            {% endif %}
+
+            <li class="page-item active">
+              <span class="page-link">{{ page_obj.number }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ query_params }}">Next</a>
+              </li>
+
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&{{ query_params }}">Last</a>
+              </li>
+            {% endif %}
+
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<div class="modal fade" id="addVendorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content shadow-sm">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-person-plus me-1"></i> Add Vendor
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="post" action="{% url 'vendor_create' %}">
+        {% csrf_token %}
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Vendor Name</label>
+            <input type="text" class="form-control" name="name" placeholder="Enter vendor name" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Mobile Number</label>
+            <input type="tel" class="form-control" name="mobile_number" placeholder="Enter mobile number" pattern="[0-9]{10}" maxlength="10">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" placeholder="Enter email address">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Address</label>
+            <textarea class="form-control" name="address" rows="3" placeholder="Enter address"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Save Vendor
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="importProgressModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-sm">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-cloud-arrow-up me-1"></i> Importing Vendors...
+        </h5>
+      </div>
+
+      <div class="modal-body">
+        <div class="progress" style="height:25px;">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" id="importProgress" style="width:0%">0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+let allSelected = false;
+
+document.addEventListener("DOMContentLoaded", function () {
+  toggleCustomDate();
+
+  const selectAll = document.getElementById("selectAllVendors");
+
+  if (selectAll) {
+    selectAll.addEventListener("change", function () {
+      allSelected = this.checked;
+      document.querySelectorAll(".vendorCheckbox").forEach(function (checkbox) {
+        checkbox.checked = allSelected;
+      });
+    });
+  }
+
+  document.querySelectorAll(".vendorCheckbox").forEach(function (checkbox) {
+    checkbox.addEventListener("change", function () {
+      if (!this.checked) {
+        allSelected = false;
+        document.getElementById("selectAllVendors").checked = false;
+      }
+    });
+  });
+
+  const excelFile = document.getElementById("excel_file");
+
+  if (excelFile) {
+    excelFile.addEventListener("change", function () {
+      let fileInput = this.files[0];
+
+      if (!fileInput) return;
+
+      let formData = new FormData();
+      formData.append("excel_file", fileInput);
+      formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+      let progressModal = new bootstrap.Modal(document.getElementById("importProgressModal"));
+      progressModal.show();
+
+      $("#importProgress").css("width", "0%").text("0%");
+
+      $.ajax({
+        url: "{% url 'vendor_import_excel' %}",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+
+        xhr: function () {
+          let xhr = new window.XMLHttpRequest();
+
+          xhr.upload.addEventListener("progress", function (evt) {
+            if (evt.lengthComputable) {
+              let percentComplete = Math.round((evt.loaded / evt.total) * 100);
+              $("#importProgress").css("width", percentComplete + "%").text(percentComplete + "%");
+            }
+          }, false);
+
+          return xhr;
+        },
+
+        success: function () {
+          $("#importProgress").css("width", "100%").text("100%");
+
+          setTimeout(function () {
+            progressModal.hide();
+
+            Swal.fire({
+              title: "Success",
+              text: "Vendors imported successfully!",
+              icon: "success",
+              timer: 3000,
+              showConfirmButton: false
+            }).then(function () {
+              location.reload();
+            });
+          }, 500);
+        },
+
+        error: function () {
+          progressModal.hide();
+          Swal.fire("Error", "Something went wrong during import", "error");
+        }
+      });
+    });
+  }
+});
+
+function toggleCustomDate() {
+  const dateFilter = document.getElementById("date_filter");
+  const customBoxes = document.querySelectorAll(".custom-date-box");
+
+  if (!dateFilter) return;
+
+  customBoxes.forEach(function (box) {
+    if (dateFilter.value === "custom") {
+      box.style.display = "block";
+    } else {
+      box.style.display = "none";
+    }
+  });
+}
+
+function confirmDeleteVendor(id) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This action cannot be undone.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#0d6efd",
+    cancelButtonColor: "#dc3545",
+    confirmButtonText: "Yes, delete it!"
+  }).then(function (result) {
+    if (result.isConfirmed) {
+      document.getElementById("delete-form-" + id).submit();
+    }
+  });
+}
+
+function bulkDeleteVendors() {
+  const selectedCheckboxes = Array.from(document.querySelectorAll(".vendorCheckbox:checked"));
+  const selectedIds = selectedCheckboxes.map(function (checkbox) {
+    return checkbox.value;
+  });
+
+  if (!selectedIds.length) {
+    return Swal.fire("No vendors selected", "", "warning");
+  }
+
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This will delete all selected vendors!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, delete all!",
+    cancelButtonText: "Cancel"
+  }).then(function (result) {
+    if (!result.isConfirmed) return;
+
+    fetch("{% url 'vendor_bulk_delete' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({
+        ids: selectedIds
+      })
+    })
+    .then(function (res) {
+      if (res.ok) {
+        location.reload();
+      } else {
+        Swal.fire("Error deleting vendors", "", "error");
+      }
+    })
+    .catch(function () {
+      Swal.fire("Something went wrong", "", "error");
+    });
+  });
+}
+
+function getRowsForExport() {
+  const selectedCheckboxes = Array.from(document.querySelectorAll(".vendorCheckbox:checked"));
+
+  let rows;
+
+  if (selectedCheckboxes.length) {
+    rows = selectedCheckboxes.map(function (checkbox) {
+      return checkbox.closest("tr");
+    });
+  } else {
+    rows = Array.from(document.querySelectorAll("#vendorTable tbody tr")).filter(function (row) {
+      return row.querySelectorAll("td").length > 1;
+    });
+  }
+
+  return rows;
+}
+
+function exportVendorsToExcel() {
+  const rowsToExport = getRowsForExport();
+
+  if (!rowsToExport.length) {
+    return Swal.fire("No data found", "", "warning");
+  }
+
+  const data = [["Sl", "Name", "Mobile", "Email", "Address"]];
+
+  rowsToExport.forEach(function (row) {
+    const cells = row.querySelectorAll("td");
+
+    data.push([
+      cells[1].innerText.trim(),
+      cells[2].innerText.trim(),
+      cells[3].innerText.trim(),
+      cells[4].innerText.trim(),
+      cells[5].innerText.trim()
+    ]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Vendors");
+  XLSX.writeFile(wb, "vendors.xlsx");
+
+  Swal.fire({
+    title: "Export Complete",
+    text: `${rowsToExport.length} vendors exported to Excel`,
+    icon: "success",
+    timer: 3000,
+    showConfirmButton: false
+  });
+}
+
+function exportVendorsToPDF() {
+  const rowsToExport = getRowsForExport();
+
+  if (!rowsToExport.length) {
+    return Swal.fire("No data found", "", "warning");
+  }
+
+  const tableData = [];
+
+  rowsToExport.forEach(function (row) {
+    const cells = row.querySelectorAll("td");
+
+    tableData.push([
+      cells[1].innerText.trim(),
+      cells[2].innerText.trim(),
+      cells[3].innerText.trim(),
+      cells[4].innerText.trim(),
+      cells[5].innerText.trim()
+    ]);
+  });
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("l", "pt", "a4");
+
+  doc.text("Vendors List", 40, 30);
+
+  doc.autoTable({
+    head: [["Sl", "Name", "Mobile", "Email", "Address"]],
+    body: tableData,
+    startY: 50,
+    styles: {
+      fontSize: 9
+    },
+    theme: "grid"
+  });
+
+  doc.save("vendors.pdf");
+
+  Swal.fire({
+    title: "Export Complete",
+    text: `${rowsToExport.length} vendors exported to PDF`,
+    icon: "success",
+    timer: 3000,
+    showConfirmButton: false
+  });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Success</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+
+        .animation {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 10px;
+        }
+
+        h1 {
+            color: #4CAF50;
+            font-size: 18px;
+            margin: 10px 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            margin: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-whatsapp {
+            background-color: #25D366;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: #128C7E;
+        }
+
+        .btn-back {
+            background-color: #007BFF;
+        }
+
+        .btn-back:hover {
+            background-color: #0056b3;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 22px;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        @media (max-width: 500px) {
+            .animation {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <span class="close-btn" >&times;</span>
+    <div class="animation" id="successAnimation" style="margin-top: -100px;"></div>
+    <h1 style="margin-top: -100px;">{{ message }}</h1>
+
+    {% if whatsapp_url %}
+    <a href="{{ whatsapp_url }}" target="_blank" class="btn btn-whatsapp">
+        📱 Send on WhatsApp
+    </a>
+    {% endif %}
+    <a href="{% url 'view_po' %}" class="btn btn-back">Ok</a>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const closeBtn = document.getElementById("closeModal");
+        closeBtn.addEventListener("click", () => {
+            window.location.href = "{% url 'view_po' %}";
+        });
+
+        lottie.loadAnimation({
+            container: document.getElementById("successAnimation"),
+            renderer: "svg",
+            loop: false,
+            autoplay: true,
+            path: "https://assets6.lottiefiles.com/packages/lf20_jbrw3hcz.json"
+        });
+    });
+</script>
+
+</body>
+</html>

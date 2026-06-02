@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Microlab</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+  {% load static %}
+
+  <!-- Favicons -->
+  <link href="https://microlablaboratories.com/wp-content/uploads/2023/04/Logo-350x160-1.png" rel="icon">
+  <link href="https://microlablaboratories.com/wp-content/uploads/2023/04/Logo-350x160-1.png" rel="icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Roboto:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets2/vendor/aos/aos.css' %}" rel="stylesheet">
+  <link href="{% static 'assets2/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets2/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets2/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets2/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets2/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="{% static 'assets2/css/style.css' %}" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- ======= Top Bar ======= -->
+  <section id="topbar" class="d-flex align-items-center">
+    <div class="container d-flex justify-content-center justify-content-md-between">
+      <div class="contact-info d-flex align-items-center">
+        <i class="bi bi-envelope d-flex align-items-center"><a href="mailto:microlabcngr@gmail.com">microlabcngr@gmail.com</a></i>
+        <a href="tel:+919961980006" class="d-flex align-items-center ms-4">
+          <i class="bi bi-phone me-2">+91 9961980006</i>
+
+        </a>
+
+      </div>
+      <div class="social-links d-none d-md-flex align-items-center">
+        <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+        <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+        <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="d-flex align-items-center">
+    <div class="container d-flex align-items-center justify-content-between">
+
+    <a href="{% url 'home' %}"   class="logo"><img src="https://microlablaboratories.com/wp-content/uploads/2023/04/Logo-350x160-1.png" alt=""></a>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link scrollto active" href="#hero">Home</a></li>
+          <li><a class="nav-link scrollto" href="https://microlablaboratories.com/about-us/">About</a></li>
+          <li><a class="nav-link scrollto" href="https://microlablaboratories.com/departments/">Departments</a></li>
+          <li><a class="nav-link scrollto" href="https://microlablaboratories.com/branches/">Branches</a></li>
+          <li><a class="nav-link scrollto" href="#contact">Contact Us</a></li>
+          <li><a class="nav-link scrollto" href="/login">Login</a></li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav><!-- .navbar -->
+
+    </div>
+  </header><!-- End Header -->
+
+  <div class="container-fluid p-0">
+    <div id="header-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="1500">
+      <div class="carousel-inner">
+
+        <!-- Slide 1 -->
+        <div class="carousel-item active">
+          <img class="w-100" src="https://microlablaboratories.com/wp-content/uploads/2020/06/hero-home-01-1.jpg" alt="Health Checkup">
+          <div class="carousel-caption d-flex h-100 align-items-center justify-content-center">
+            <div class="text-center">
+              <h1 class="px-4 py-4 rounded" style="color:black">Welcome to Microlab Laboratories</h1>
+              <a href="tel:919947049199" class="btn btn-primary mt-3" style="background-color: #033756;">Book Now</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+ 
+    </div>
+  </div>
+
+<!-- ======= Contact Section ======= -->
+<section id="contact" class="contact py-5 bg-light">
+  <div class="container" data-aos="fade-up">
+
+    <div class="section-title text-center mb-4">
+      <h2>Contact</h2>
+      <h3><span>Contact Us</span></h3>
+    </div>
+
+    <div class="row align-items-center" data-aos="fade-up" data-aos-delay="100">
+      <!-- Contact Info -->
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <div class="bg-white p-4 shadow-sm rounded mb-4 d-flex">
+          <div class="me-3">
+            <i class="bx bx-map fs-1 text-primary"></i>
+          </div>
+          <div>
+            <h5 class="mb-1">Our Address</h5>
+            <p class="mb-0">Microlab Laboratories, Mavelikkara Kozhenchery Road SH 10,<br>Althara - Engineering College Jct Rd,<br>Chengannur, Kerala 689121</p>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 shadow-sm rounded mb-4 d-flex">
+          <div class="me-3">
+            <i class="bx bx-envelope fs-1 text-primary"></i>
+          </div>
+          <div>
+            <h5 class="mb-1">Email Us</h5>
+            <p class="mb-0">
+              <a href="mailto:microlabcngr@gmail.com" style="color: inherit; text-decoration: none;">
+                microlabcngr@gmail.com
+              </a>
+            </p>
+            
+          </div>
+        </div>
+
+        <div class="bg-white p-4 shadow-sm rounded d-flex">
+          <div class="me-3">
+            <i class="bx bx-phone-call fs-1 text-primary"></i>
+          </div>
+          <div>
+            <h5 class="mb-1">Call Us</h5>
+            <p class="mb-0">
+              <a href="tel:+919400695227" style="color: inherit; text-decoration: none;">
+                +91 9400695227
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Google Map -->
+      <div class="col-lg-6">
+        <div class="map-responsive">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3937.1561129155543!2d76.61864159999999!3d9.319432199999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b0622c27696c295%3A0x62f924afb97a1ea5!2sMicrolab%20Laboratories!5e0!3m2!1sen!2sin!4v1754533517322!5m2!1sen!2sin" width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- End Contact Section -->
+
+  </main><!-- End #main -->
+<!-- ======= Footer ======= -->
+<footer id="footer" class="bg-light text-dark">
+
+  <div class="footer-top py-5">
+    <div class="container">
+      <div class="row">
+
+        <div class="col-lg-3 col-md-6 footer-contact">
+          <h3>Microlab Laboratories<span>.</span></h3>
+          <p>
+            SH 10, Mavelikkara Kozhenchery Road,<br>
+            Althara - Engineering College Jct Rd,<br>
+            Pathanamthitta, Kerala 689641<br><br>
+            <strong>Phone:</strong> +91 98765 43210<br>
+            <strong>Email:</strong> contact@microlab.in<br>
+          </p>
+        </div>
+
+        <div class="col-lg-3 col-md-6 footer-links">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><i class="bx bx-chevron-right"></i> <a href="#">Home</a></li>
+            <li><i class="bx bx-chevron-right"></i> <a href="https://microlablaboratories.com/about-us/">About Us</a></li>
+            <li><i class="bx bx-chevron-right"></i> <a href="https://microlablaboratories.com/departments/">Departments</a></li>
+            <li><i class="bx bx-chevron-right"></i> <a href="https://microlablaboratories.com/branches/">Branches</a></li>
+            <li><i class="bx bx-chevron-right"></i> <a href="#contact">Contact Us</a></li> 
+            <li><i class="bx bx-chevron-right"></i> <a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3 col-md-6 footer-links">
+          <h4>Our Services</h4>
+          <ul>
+            <li><i class="bx bx-chevron-right"></i> <a href="#">Home Visit for Blood Collection</a></li>
+            <li><i class="bx bx-chevron-right"></i> <a href="#">uick, Accurate & Infallible Results</a></li>
+            <li><i class="bx bx-chevron-right"></i> <a href="#">
+              Download Test Results Online.</a></li>
+            <li><i class="bx bx-chevron-right"></i> <a href="#">Premium Facilities & Infrastructure.</a></li>
+            <li><i class="bx bx-chevron-right"></i> <a href="#">
+              Experienced Specialists.</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3 col-md-6 footer-links">
+          <h4>Connect with Us</h4>
+          <p>Follow us on social media for updates and news.</p>
+          <div class="social-links mt-3">
+            <a href="#" class="twitter"><i class="bx bxl-twitter"></i></a>
+            <a href="#" class="facebook"><i class="bx bxl-facebook"></i></a>
+            <a href="#" class="instagram"><i class="bx bxl-instagram"></i></a>
+            <a href="#" class="linkedin"><i class="bx bxl-linkedin"></i></a>
+            <a href="https://www.google.com/maps/place/Microlab+Laboratories/@9.3194322,76.6186416,17z" target="_blank" class="google"><i class="bx bx-map"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4 text-center">
+    <div class="copyright">
+      &copy; <strong><span>Microlab Laboratories</span></strong>. All Rights Reserved
+    </div>
+    <div class="credits">
+
+    </div>
+  </div>
+
+</footer><!-- End Footer -->
+
+  <div id="preloader"></div>
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<!-- Vendor JS Files -->
+<script src="{% static 'assets2/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+<script src="{% static 'assets2/vendor/aos/aos.js' %}"></script>
+<script src="{% static 'assets2/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'assets2/vendor/glightbox/js/glightbox.min.js' %}"></script>
+<script src="{% static 'assets2/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
+<script src="{% static 'assets2/vendor/swiper/swiper-bundle.min.js' %}"></script>
+<script src="{% static 'assets2/vendor/waypoints/noframework.waypoints.js' %}"></script>
+<script src="{% static 'assets2/vendor/php-email-form/validate.js' %}"></script>
+
+<!-- Template Main JS File -->
+<script src="{% static 'assets2/js/main.js' %}"></script>
+
+
+</body>
+
+</html>

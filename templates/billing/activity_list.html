@@ -1,0 +1,68 @@
+{% include 'admin_navbar.html' %}
+<div class="main-content">
+
+    <div class="d-flex justify-content-between mb-3">
+
+        <h3>Billing Activities</h3>
+
+        <a href="{% url 'billing_activity_add' %}"
+           class="btn btn-primary">
+
+            Add Activity
+
+        </a>
+
+    </div>
+
+    <table class="table table-bordered">
+
+        <thead>
+
+            <tr>
+                <th>Name</th>
+                <th>Code</th>
+                <th>Charge</th>
+                <th>Action</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for i in activities %}
+
+            <tr>
+
+                <td>{{ i.name }}</td>
+
+                <td>{{ i.code }}</td>
+
+                <td>₹ {{ i.charge }}</td>
+
+                <td>
+
+                    <a href="{% url 'billing_activity_edit' i.id %}"
+                       class="btn btn-warning btn-sm">
+
+                        Edit
+
+                    </a>
+
+                    <a href="{% url 'billing_activity_delete' i.id %}"
+                       class="btn btn-danger btn-sm">
+
+                        Delete
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>

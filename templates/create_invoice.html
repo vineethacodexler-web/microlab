@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create invoice Order</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+
+
+        h1 {
+            margin-bottom: 30px;
+            color: #007bff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .product-row {
+          
+        }
+
+        .add-product-btn {
+            margin-top: 10px;
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        /* customer Search Dropdown */
+        #customerDropdown {
+            display: none;
+            position: absolute;
+            background-color: white;
+            width: auto;
+            padding: 15px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        #customerDropdown li {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        #customerDropdown li:hover {
+            background-color: #f1f1f1;
+        }
+
+        #nocustomerResults {
+            display: none;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body style="background-color: #f5f5f5;">
+
+    <h3 style="background-color:#0d6aff;color:white;padding:10px;">Invoice No. : {{ next_invoice_number }}</h3>
+
+    <div  >
+
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" class="shadow p-4 bg-white rounded">
+            {% csrf_token %}
+        
+            <div class="row g-2 align-items-end">
+                <!-- invoice Order Date -->
+                <div class="col-md-2">
+                    <label for="date" class="form-label">Date:</label>
+                    <input type="date" id="date" name="date" class="form-control" required />
+                </div>
+        
+                <!-- customer Selection -->
+                <div class="col-md-2 position-relative">
+                    <label for="customer" class="form-label">customer:</label>
+                    <input type="text"style=" overflow: scroll; " id="customer" name="customer" class="form-control" placeholder="Search customer" oninput="filtercustomers(this.value)" autocomplete="off" required>
+                    <ul id="customerDropdown" class="dropdown-menu mt-1">
+                        {% for customer in customers %}
+                            <li class="dropdown-item" data-customer-name="{{ customer.name }}" data-customer-email="{{ customer.email }}" data-customer-contact="{{ customer.contact_number }}" data-customer-address="{{ customer.address }}" onclick="selectcustomer(this)">{{ customer.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div id="nocustomerResults" style="display: none;" class="mt-2">
+                        <button type="button" class="btn btn-primary w-100" onclick="window.location.href = '{% url 'customer_list' %}'">Add customer</button>
+                    </div>
+                </div>
+                
+                <script>
+                    function filtercustomers(searchValue) {
+                        const dropdown = document.getElementById('customerDropdown');
+                        const noResults = document.getElementById('nocustomerResults');
+                        const items = dropdown.querySelectorAll('.dropdown-item');
+                        let found = false;
+                
+                        items.forEach(item => {
+                            if (item.textContent.toLowerCase().includes(searchValue.toLowerCase())) {
+                                item.style.display = '';
+                                found = true;
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
+                
+                        if (found) {
+                            dropdown.style.display = 'block';
+                            noResults.style.display = 'none';
+                        } else {
+                            dropdown.style.display = 'none';
+                            noResults.style.display = 'block';
+                        }
+                    }
+                
+                    function selectcustomer(item) {
+                        document.getElementById('customer').value = item.getAttribute('data-customer-name');
+                        document.getElementById('customerDropdown').style.display = 'none';
+                        document.getElementById('nocustomerResults').style.display = 'none';
+                    }
+                </script>
+                
+        
+                <!-- customer Email -->
+                <div class="col-md-2">
+                    <label for="customer_email" class="form-label">customer Email:</label>
+                    <input type="email" id="customer_email" name="customer_email" class="form-control"  />
+                </div>
+            <!-- Contact Number -->
+                <div class="col-md-2">
+                    <label for="contact_number" class="form-label">Contact Number:</label>
+                    <input type="text" id="contact_number" name="contact_number" class="form-control"  />
+                </div>
+
+                <div class="col-md-2">
+                    <label for="price" class="form-label">Select Price Group:</label>
+                <select id="priceCategorySelect" class="form-control"  onchange="updatePriceCategory()">
+                    <option value="price1">Price Category 1</option>
+                    <option value="price2">Price Category 2</option>
+                    <option value="price3">Price Category 3</option>
+                </select>
+                         </div>
+            </div>
+            <div class="row g-2 mt-2 align-items-end">
+                <div class="col-md-2">
+                    <label for="customer_address" class="form-label">customer Address:</label>
+                    <textarea id="customer_address" name="customer_address" class="form-control" rows="1" ></textarea>
+                </div>
+
+              
+                <!-- Remarks -->
+                <div class="col-md-2">
+                    <label for="remarks" class="form-label">Remarks:</label>
+                    <textarea id="remarks" name="remarks" class="form-control" rows="1"></textarea>
+                </div>
+           
+            <div class="col-md-2">
+                    <label for="payment_type" class="form-label">Payment Type:</label>
+                    <select id="payment_type" name="payment_type" class="form-control" required>
+                        <option value="" disabled selected>Select Payment Type</option>
+                        <option value="cash">Cash</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                        <option value="UPI_Payment">UPI Payment</option>
+                        <option value="debit_card">Debit Card</option>
+                    </select>
+                </div>
+        
+                <div class="col-md-2">
+                    <label for="payment_status">Payment Status:</label>
+                    <select id="payment_status" name="payment_status" class="form-control" required>
+                        <option value="" disabled selected>Select Payment Status</option>
+                        <option value="Paid">Paid</option>
+                        <option value="unpaid">UnPaid</option>
+                        <option value="partial">Partial Payment</option>
+                    </select>
+                </div>
+                        <div class="col-md-2" id="partial_payment_field" style="display: none;">
+                    <label for="paid">Partial Payment Amount</label>
+                    <input type="text" id="paid" name="paid" value="0.00" class="form-control" placeholder="Enter paid amount" required>
+                </div>
+                
+                <script>
+                    document.getElementById('payment_status').addEventListener('change', function() {
+                        var paymentStatus = this.value;
+                        var partialPaymentField = document.getElementById('partial_payment_field');
+                        
+                        if (paymentStatus === 'partial') {
+                            partialPaymentField.style.display = 'block';
+                        } else {
+                            partialPaymentField.style.display = 'none';
+                        }
+                    });
+                </script>  
+                        <!-- Dynamic Price Category Selection -->
+                        
+                
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                <button type="button" style="font-size: 25px; background-color: #007aff; color: white;width:150px;" onclick="addProductRow()">
+                    Add Items
+                </button>  
+            </div><br>
+  
+            
+
+    <script>
+        function filtercustomers(searchTerm) {
+            const dropdown = document.getElementById('customerDropdown');
+            const items = dropdown.querySelectorAll('li');
+            const noResultsDiv = document.getElementById('nocustomerResults');
+            
+            if (searchTerm.trim() === '') {
+                dropdown.style.display = 'none';
+                noResultsDiv.style.display = 'none';
+                return;
+            }
+
+            let hasResults = false;
+            items.forEach(item => {
+                const customerName = item.getAttribute('data-customer-name').toLowerCase();
+                if (customerName.includes(searchTerm.toLowerCase())) {
+                    item.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            if (hasResults) {
+                dropdown.style.display = 'block';
+                noResultsDiv.style.display = 'none';
+            } else {
+                dropdown.style.display = 'none';
+                noResultsDiv.style.display = 'block';
+            }
+        }
+
+        function selectcustomer(item) {
+            const customerName = item.getAttribute('data-customer-name');
+            const customerEmail = item.getAttribute('data-customer-email');
+            const customerContact = item.getAttribute('data-customer-contact');
+            const customerAddress = item.getAttribute('data-customer-address');
+
+            document.getElementById('customer').value = customerName;
+            document.getElementById('customer_email').value = customerEmail;
+            document.getElementById('contact_number').value = customerContact;
+            document.getElementById('customer_address').value = customerAddress;
+
+            document.getElementById('customerDropdown').style.display = 'none';
+        }
+    </script>
+
+
+
+<br><!-- Include Bootstrap CSS (for styling) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<!-- Include jQuery (for Bootstrap modals) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Include Bootstrap JS (for modal functionality) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom Modal Styling -->
+<style>
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease-out;
+        opacity: 0;
+    }
+
+    .modal.show .modal-dialog {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .modal.fade .modal {
+        transition: opacity 0.3s ease-out;
+    }
+
+    .modal.show .modal {
+        opacity: 1;
+    }
+</style>
+
+<style>
+    .table {
+      border-collapse: collapse;
+      width: 100%;
+      border: 1px solid black;
+    }
+    
+    .table td {
+      border: 1px solid black;
+      padding: 8px;
+    }
+    
+    .table th {
+      background-color: #007afe;
+      color: white;
+    }
+    
+    </style>     
+     <div >
+        <label for="toggle-gst-checkbox" style="display: flex; align-items: center;">
+            <input type="checkbox" id="toggle-gst-checkbox" onchange="toggleGST()" />
+           &nbsp; Show GST
+        </label>
+    </div>
+    
+    
+    
+    <div style="max-height: 200px; overflow-y: auto; border: 1px solid black;">
+        <table id="product-table" style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr style="border: 1px solid black;">
+                    <th style="border: 1px solid black; padding: 8px; background-color:#007afe; color:white;">Sl No.</th>
+                    <th style="border: 1px solid black; padding: 8px; background-color:#007afe; color:white;">Item Code</th>
+                    <th style="border: 1px solid black; padding: 8px; background-color:#007afe; color:white;">Item</th>
+                    <th style="border: 1px solid black; padding: 8px; background-color:#007afe; color:white;">MRP</th>
+                    <th style="border: 1px solid black; padding: 8px; background-color:#007afe; color:white;">Quantity</th>
+                    <th style="border: 1px solid black; padding: 8px; background-color:#007afe; color:white;">Price</th>
+                    <th class="gst-column" style="display: none; border: 1px solid black; padding: 8px; background-color:#007afe; color:white;">GST Rate (%)</th>
+                    <th style="border: 1px solid black; padding: 8px; background-color:#007afe; color:white;">Total</th>
+                    <th style="border: 1px solid black; padding: 8px; background-color:#007afe; color:white;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="product-rows">
+                <tr class="product-row">
+                    <td style="border: 1px solid black; padding: 8px;" class="serial-no">1</td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <input type="text" name="product_custom_code" id="product_custom_code_0" required placeholder="Search Code" onclick="openProductModal(0)">
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <input name="product" value="" required>
+                    </td>
+                    <td  style=" border: 1px solid black; padding: 8px;">
+                        <input type="number" name="mrp"  required >
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <input type="number" name="quantity" min="1" style="width:80px;" required oninput="calculateRowTotal(this)">
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <input type="number" name="product_price" step="0.01" required oninput="calculateRowTotal(this)">
+                    </td>
+
+                    <td class="gst-column" style="display: none; border: 1px solid black; padding: 8px;">
+                        <input type="number" name="product_gst" style="width:80px;" step="0.01" required oninput="calculateRowTotal(this)">
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <span class="row-total" id="rowtotal_0">0.00</span>
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <button type="button" class="remove-product-btn" onclick="removeProductRow(this)">Remove</button>
+                    </td>
+                </tr>
+            </tbody>
+    
+     
+    
+        </table>
+        <div style="text-align: right; width: 100%;font-size: 23px; ">
+            Sub Total <input id="subtotal" style="font-size: 23px; color:red;" readonly>
+        </div>
+        
+        <script>
+            let serialNumber = 1;
+    
+            // Function to calculate the row total for each row based on quantity and price
+            function calculateRowTotal(inputElement) {
+                const row = inputElement.closest('tr'); // Get the closest row
+                const quantity = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
+                const price = parseFloat(row.querySelector('[name="product_price"]').value) || 0;
+    
+                // Calculate the row total: quantity * price
+                const rowTotal = quantity * price;
+    
+                // Update the row total in the span element for this row
+                const rowTotalElement = row.querySelector('.row-total');
+                rowTotalElement.textContent = rowTotal.toFixed(2); // Display row total with 2 decimals
+    
+                // After calculating row total, update the overall totals (like subtotal, GST, etc.)
+                calculateTotal(); // Call this to update the grand total and other totals
+            }
+    
+            // Function to calculate subtotal, SGST, CGST, and grand total
+            function calculateTotal() {
+                let subtotal = 0;
+                let totalSGST = 0;
+                let totalCGST = 0;
+    
+                document.querySelectorAll('.product-row').forEach(row => {
+                    const quantity = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
+                    const price = parseFloat(row.querySelector('[name="product_price"]').value) || 0;
+                    const gstRate = parseFloat(row.querySelector('[name="product_gst"]').value) || 0;
+    
+                    const rowTotal = quantity * price;
+                    const gstAmount = rowTotal * (gstRate / 100);
+                    const sgst = gstAmount / 2;
+                    const cgst = gstAmount / 2;
+                    subtotal += rowTotal;
+                    totalSGST += sgst;
+                    totalCGST += cgst;
+                });
+    
+                const grandTotal = subtotal + totalSGST + totalCGST;
+    
+                // Update totals in UI
+                document.getElementById('subtotal').value = subtotal.toFixed(2);
+                document.getElementById('sgst').value = totalSGST.toFixed(2);
+                document.getElementById('cgst').value = totalCGST.toFixed(2);
+                document.getElementById('grand-total').value = grandTotal.toFixed(2);
+            }
+    
+            // Function to add a new product row
+            function addProductRow() {
+                const table = document.getElementById('product-rows');
+                const newRow = table.insertRow();
+                const rowIndex = table.rows.length - 1;
+                serialNumber++; // Increment the serial number
+    
+                newRow.classList.add('product-row');
+                newRow.innerHTML = `
+                    <td style="border: 1px solid black; padding: 8px;" class="serial-no">${serialNumber}</td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <input type="text" name="product_custom_code" id="product_custom_code_${rowIndex}" required placeholder="Search  code" onclick="openProductModal(${rowIndex})">
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <input name="product" value="" required>
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <input type="number" name="mrp"  required >
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <input type="number" name="quantity" style="width:80px;"  min="1" required oninput="calculateRowTotal(this)">
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <input type="number" name="product_price" step="0.01" required oninput="calculateRowTotal(this)">
+                    </td>
+
+                    <td class="gst-column" style="display: none; border: 1px solid black; padding: 8px;">
+                        <input type="number" name="product_gst" style="width:80px;"step="0.01" required oninput="calculateRowTotal(this)">
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <span class="row-total" id="rowtotal_${rowIndex}">0.00</span>
+                    </td>
+                    <td style="border: 1px solid black; padding: 8px;">
+                        <button type="button" class="remove-product-btn" onclick="removeProductRow(this)">Remove</button>
+                    </td>
+                `;
+                updateSerialNumbers(); // Update serial numbers for all rows
+            }
+    
+            // Function to remove product row
+            function removeProductRow(button) {
+                const row = button.closest('tr');
+                row.remove();
+                calculateTotal(); // Update totals when a row is removed
+                updateSerialNumbers(); // Update serial numbers after removal
+            }
+    
+            // Function to update serial numbers after adding or removing rows
+            function updateSerialNumbers() {
+                let serial = 1;
+                document.querySelectorAll('.product-row').forEach(row => {
+                    row.querySelector('.serial-no').textContent = serial++;
+                });
+            }
+    
+            // Function to toggle GST visibility
+            function toggleGST() {
+                const gstColumns = document.querySelectorAll('.gst-column');
+                const toggleButton = document.getElementById('toggle-gst-btn');
+                let isHidden = gstColumns[0].style.display === 'none';
+    
+                gstColumns.forEach(col => {
+                    col.style.display = isHidden ? '' : 'none';
+                });
+    
+                toggleButton.textContent = isHidden ? 'Hide GST' : 'Show GST';
+            }
+    
+            // Hide GST columns by default on page load
+            window.onload = function() {
+                document.querySelectorAll('.gst-column').forEach(col => col.style.display = 'none');
+            };
+        </script>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;">
+        
+        <div style="display: flex; gap: 10px;">
+            <strong class="gst-column" style="display: none;">SGST (9%):</strong>
+            <input class="gst-column" style="display: none;" type="text" id="sgst" value="0.00" readonly>
+            <strong class="gst-column" style="display: none;">CGST (9%):</strong>
+            <input class="gst-column" style="display: none;" type="text" id="cgst" value="0.00" readonly>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <strong class="gst-column" style="display: none;">Grand Total:</strong>
+            <input class="gst-column" style="display: none; padding: 10px; text-align: center; color: red; width: 200px; height: 50px; font-size: 30px;" type="text" id="grand-total" value="0.00" readonly>
+        </div>
+    </div>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <div style="position: fixed; bottom: 20px; right: 20px;  display: flex; gap: 8px;">
+        <button type="button" style="font-size:20px;" onclick="location.href='{% url 'admin_home' %}'" class="btn btn-secondary">
+            <i class="fas fa-times-circle"></i> Cancel
+        </button>
+    
+        <button type="reset" style="font-size:20px;background-color: #e1e3e6;" class="btn btn-light">
+            <i class="fas fa-eraser"></i> Clear
+        </button>
+    
+        <button type="submit" style="font-size:20px;" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save
+        </button>
+    </div>
+
+<!-- Bootstrap and Custom Scripts -->
+<script>
+    let selectedRowIndex = null;
+
+    // Open product modal
+    function openProductModal(rowIndex) {
+        selectedRowIndex = rowIndex;
+        const modal = new bootstrap.Modal(document.getElementById('productModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+        modal.show();
+    }
+
+    // Filter products based on search input
+    function filterProducts() {
+        const input = document.getElementById('productSearch');
+        const filter = input.value.toUpperCase();
+        const ul = document.getElementById('productList');
+        const li = ul.getElementsByTagName('li');
+        
+        Array.from(li).forEach(item => {
+            const text = item.textContent || item.innerText;
+            item.style.display = text.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+        });
+    }
+
+    // Select a product and update the row
+    function selectProduct(item) {
+        const productCode = item.getAttribute('data-product-code');
+        const productName = item.getAttribute('data-product-name');
+        const productMRP = item.getAttribute('data-product-mrp');
+        const productPrice1 = item.getAttribute('data-product-price1');
+        const productPrice2 = item.getAttribute('data-product-price2');
+        const productPrice3 = item.getAttribute('data-product-price3');
+        const productGST = item.getAttribute('data-product-gst');
+        
+        const row = document.querySelectorAll('.product-row')[selectedRowIndex];
+        row.querySelector('[name="product_custom_code"]').value = productCode;
+        row.querySelector('[name="product"]').value = productName;
+        row.querySelector('[name="mrp"]').value = productMRP;
+        row.querySelector('[name="product_gst"]').value = productGST;
+
+        // Dynamically update product price based on selected category
+        updateProductPrice(row, productPrice1, productPrice2, productPrice3);
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+        modal.hide();
+    }
+
+    // Function to update product price based on the selected price category
+    function updateProductPrice(row, price1, price2, price3) {
+        const priceCategory = document.getElementById('priceCategorySelect').value;
+        
+        let selectedPrice;
+        if (priceCategory === 'price1') {
+            selectedPrice = price1;
+        } else if (priceCategory === 'price2') {
+            selectedPrice = price2;
+        } else if (priceCategory === 'price3') {
+            selectedPrice = price3;
+        }
+
+        row.querySelector('[name="product_price"]').value = selectedPrice;
+        calculateTotal();
+    }
+
+    // Function to update price based on price category selection change
+    function updatePriceCategory() {
+        const rows = document.querySelectorAll('.product-row');
+        rows.forEach(function(row, index) {
+            const productCode = row.querySelector('[name="product_custom_code"]').value;
+            const productItem = Array.from(document.querySelectorAll('.product-item')).find(item => item.getAttribute('data-product-code') === productCode);
+            if (productItem) {
+                const price1 = productItem.getAttribute('data-product-price1');
+                const price2 = productItem.getAttribute('data-product-price2');
+                const price3 = productItem.getAttribute('data-product-price3');
+                updateProductPrice(row, price1, price2, price3);
+            }
+        });
+    }
+
+    // Remove product row
+    function removeProductRow(button) {
+        const row = button.closest('tr');
+        row.remove();
+        calculateTotal();
+    }
+</script>
+
+<!-- Modal for Product Selection -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Select Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="max-height: 300px; overflow-y: auto;">
+                <input type="text" class="form-control mb-3" id="productSearch" placeholder="Search Products" onkeyup="filterProducts()" />
+                <ul id="productList" class="list-group">
+                    {% for product in products %}
+                    <li class="list-group-item product-item" 
+                        data-product-code="{{ product.custom_code }}" 
+                        data-product-name="{{ product.name }}" 
+                        data-product-mrp="{{ product.mrp }}" 
+                        data-product-price1="{{ product.price1 }}" 
+                        data-product-price2="{{ product.price2 }}" 
+                        data-product-price3="{{ product.price3 }}" 
+                        data-product-gst="{{ product.gst }}" 
+                        onclick="selectProduct(this)">
+                        
+                        <div>
+                            <span class="product-code" style="font-size: 15px;"><strong>Item Code:&nbsp;&nbsp;</strong> {{ product.custom_code }}</span>
+                            <br> <span class="product-name" style="font-size: 15px;"><strong>Product:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>{{ product.name }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styling for the list item */
+    li.product-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        cursor: pointer;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        color: black;
+    }
+
+    li.product-item:hover {
+        background-color: #f0f0f0;
+        transform: translateX(5px);
+        border-color: #007bff;
+    }
+
+    .product-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .product-code,
+    .product-name {
+        margin: 0 10px;
+    }
+
+    .product-price {
+        font-size: 16px;
+        font-weight: bold;
+        color: #007bff;
+        transition: color 0.3s ease;
+    }
+
+    li.product-item:hover .product-price {
+        color: #0056b3;
+    }
+
+    li.product-item:focus {
+        outline: none;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    li.selected {
+        background-color: #e0e0e0;
+        border-color: #007bff;
+    }
+
+    .selected .product-code,
+    .selected .product-name,
+    .selected .product-price {
+        color: #0056b3;
+    }
+</style>

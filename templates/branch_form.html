@@ -1,0 +1,13 @@
+
+
+<h2>{{ action }} Branch</h2>
+<form method="post">
+    {% csrf_token %}
+
+    
+    <label>Location:</label><br>
+    <input type="text" name="location" value="{{ branch.location|default:'' }}"><br><br>
+
+    <button type="submit">{{ action }}</button>
+</form>
+<a href="{% url 'branch_list' %}">Back to list</a>

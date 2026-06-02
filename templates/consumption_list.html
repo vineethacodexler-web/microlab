@@ -1,0 +1,245 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create consumption Order</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .bg-light-blue {
+            background-color: #e9f2ff;
+        }
+    </style>
+</head>
+<body>
+{% include 'branch_navbar.html' %}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><strong>Create consumption Order</strong></h4>
+        <a href="/view_consumed_orders" class="btn btn-primary">View Orders</a>
+    </div>
+
+
+    <form method="POST" action="{% url 'create_consumed_order' %}">
+        {% csrf_token %}
+        <input type="hidden" id="vendor" name="vendor_id">
+        <input type="hidden" name="invoice_number" value="PO-{{ timestamp|default:'001' }}">
+        <input type="hidden" name="company" id="company_hidden">
+
+        <!-- Selection: Item or Vendor -->
+        <div class="mb-3">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="type" id="itemRadio" value="item" checked onchange="toggleSelects()">
+                <label class="form-check-label" for="itemRadio">Item</label>
+            </div>
+
+            <select class="form-select d-inline-block w-auto ms-3" name="item_select" id="item_select">
+                <option value="">-- Select Item --</option>
+                {% for item in items %}
+                    <option value="{{ item.id }}">{{ item.name }}</option>
+                {% endfor %}
+            </select>
+            
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const select = document.getElementById("item_select");
+                    const seen = new Set();
+                    const options = Array.from(select.options);
+            
+                    options.forEach(option => {
+                        const text = option.text.trim();
+                        if (seen.has(text) && option.value !== '') {
+                            option.remove();  // remove duplicate
+                        } else {
+                            seen.add(text);
+                        }
+                    });
+                });
+            </script>
+            
+
+            <div class="form-check form-check-inline ms-3">
+                <input class="form-check-input" type="radio" name="type" id="vendorRadio" value="vendor" onchange="toggleSelects()">
+                <label class="form-check-label" for="vendorRadio">Vendor</label>
+            </div>
+
+            <select name="vendor_dropdown" id="vendor_select" class="form-select d-inline-block w-auto ms-3">
+                <option value="">Select Vendor</option>
+                {% for vendor in vendors %}
+                    <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Entry Form -->
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Company</th>
+                    <th>Price</th>
+                    <th>Pack</th>
+                    <th>Stock</th>
+                    <th>GST</th>
+                    <th>HSN</th>
+                    <th>QTY</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="manualEntryBody">
+                <tr id="singleItemRow">
+                    <td><input type="text" id="company" class="form-control" ></td>
+                    <td><input type="number" id="price" class="form-control" step="0.01"></td>
+                    <td><input type="text" id="pack" class="form-control"></td>
+                    <td><input type="number" id="stock" class="form-control" step="0.01"></td>
+                    <td><input type="number" id="gst" class="form-control" step="0.01"></td>
+                    <td><input type="text" id="hsn" class="form-control"></td>
+                    <td><input type="number" id="qty" class="form-control" step="0.01"></td>
+                    <td><button type="button" class="btn btn-success btn-sm" onclick="addToTableFromSingle()">Add</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Added Items -->
+        <h5 class="mt-4 mb-2"><strong>Added Items</strong></h5>
+        <table class="table table-bordered bg-light-blue" id="addedItemsTable">
+            <thead class="table-primary">
+                <tr>
+                    <th>Company</th>
+                    <th>Price</th>
+                    <th>Pack</th>
+                    <th>Stock</th>
+                    <th>GST</th>
+                    <th>HSN</th>
+                    <th>QTY</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+    </form>
+</div>
+<script>
+    function toggleSelects() {
+        const isItem = document.getElementById('itemRadio').checked;
+        document.getElementById('item_select').style.display = isItem ? 'inline-block' : 'none';
+        document.getElementById('vendor_select').style.display = isItem ? 'none' : 'inline-block';
+        document.getElementById('manualEntryBody').innerHTML = isItem ? document.getElementById('singleItemRow').outerHTML : '';
+    }
+
+    function addToTable(company, price, pack, stock, gst, hsn, qty, itemId) {
+        if (!qty || !itemId) {
+            alert("Please fill all fields.");
+            return;
+        }
+
+        const row = `<tr>
+            <td>${company}<input type="hidden" name="company[]" value="${company}"></td>
+            <td>${price}<input type="hidden" name="price[]" value="${price}"></td>
+            <td>${pack}<input type="hidden" name="pack[]" value="${pack}"></td>
+            <td>${stock}<input type="hidden" name="stock[]" value="${stock}"></td>
+            <td>${gst}<input type="hidden" name="gst[]" value="${gst}"></td>
+            <td>${hsn}<input type="hidden" name="hsn[]" value="${hsn}"></td>
+            <td>
+                ${qty}
+                <input type="hidden" name="qty[]" value="${qty}">
+                <input type="hidden" name="item_id[]" value="${itemId}">
+            </td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>
+        </tr>`;
+        document.querySelector("#addedItemsTable tbody").insertAdjacentHTML('beforeend', row);
+    }
+
+    function addToTableFromSingle() {
+        const company = document.getElementById('company').value;
+        const price = document.getElementById('price').value;
+        const pack = document.getElementById('pack').value;
+        const stock = document.getElementById('stock').value;
+        const gst = document.getElementById('gst').value;
+        const hsn = document.getElementById('hsn').value;
+        const qty = document.getElementById('qty').value;
+        const itemId = document.getElementById('item_select').value;
+
+        addToTable(company, price, pack, stock, gst, hsn, qty, itemId);
+    }
+
+    function addFromManualRow(itemId) {
+        const company = document.getElementById(`company_${itemId}`).value;
+        const price = document.getElementById(`price_${itemId}`).value;
+        const pack = document.getElementById(`pack_${itemId}`).value;
+        const stock = document.getElementById(`stock_${itemId}`).value;
+        const gst = document.getElementById(`gst_${itemId}`).value;
+        const hsn = document.getElementById(`hsn_${itemId}`).value;
+        const qty = document.getElementById(`qty_${itemId}`).value;
+
+        addToTable(company, price, pack, stock, gst, hsn, qty, itemId);
+        document.getElementById(`row_${itemId}`).remove();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleSelects();
+
+        // Item dropdown selection
+        document.getElementById('item_select').addEventListener('change', function () {
+            const itemId = this.value;
+            if (!itemId) return;
+
+            fetch(`/get-item-details/?item_id=${itemId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) return alert(data.error);
+
+                    document.getElementById('company').value = data.company_name || '';
+                    document.getElementById('price').value = data.item_price || '';
+                    document.getElementById('pack').value = data.pack_size || '';
+                    document.getElementById('stock').value = data.stock_balance || '';
+                    document.getElementById('gst').value = data.gst || '';
+                    document.getElementById('hsn').value = data.hsn || '';
+                    document.getElementById('vendor').value = data.vendor.id || '';
+                    document.getElementById('company_hidden').value = data.company_name || '';
+                });
+        });
+
+        // Vendor dropdown selection
+        document.getElementById('vendor_select').addEventListener('change', function () {
+            const vendorId = this.value;
+            document.getElementById('vendor').value = vendorId;
+
+            fetch(`/get-vendor-details/?vendor_id=${vendorId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) return alert(data.error);
+
+                    const tableBody = document.getElementById('manualEntryBody');
+                    tableBody.innerHTML = '';
+
+                    data.items.forEach(item => {
+                        const row = `<tr id="row_${item.item_id}">
+                            <td><input type="text" class="form-control" id="company_${item.item_id}" value="${item.company}" ></td>
+                            <td><input type="number" class="form-control" id="price_${item.item_id}" value="${item.price}" step="0.01"></td>
+                            <td><input type="text" class="form-control" id="pack_${item.item_id}" value="${item.pack}"></td>
+                            <td><input type="number" class="form-control" id="stock_${item.item_id}" value="${item.stock}" step="0.01"></td>
+                            <td><input type="number" class="form-control" id="gst_${item.item_id}" value="${item.gst}" step="0.01"></td>
+                            <td><input type="text" class="form-control" id="hsn_${item.item_id}" value="${item.hsn}"></td>
+                            <td><input type="number" class="form-control" id="qty_${item.item_id}" step="0.01"></td>
+                            <td><button type="button" class="btn btn-success btn-sm" onclick="addFromManualRow('${item.item_id}')">Add</button></td>
+                        </tr>`;
+                        tableBody.insertAdjacentHTML('beforeend', row);
+                    });
+                });
+        });
+    });
+</script>
+
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+      
+</body>
+</html>

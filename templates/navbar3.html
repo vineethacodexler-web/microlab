@@ -1,0 +1,537 @@
+{% include 'links.html' %}
+{% load static %}
+
+<style>
+    :root {
+        --ml-nav-primary: #0f75bc;
+        --ml-nav-dark: #0f172a;
+        --ml-nav-border: #e5e7eb;
+        --ml-nav-bg: rgba(255, 255, 255, 0.96);
+    }
+
+    body.ml-navbar-page {
+        padding-top: 96px;
+        background: #f4f7fb;
+    }
+
+    .ml-top-support-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-height: 34px;
+        background: linear-gradient(90deg, #0f75bc, #38bdf8);
+        color: #fff;
+        z-index: 1050;
+        padding: 0 24px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(15, 117, 188, 0.18);
+    }
+
+    .ml-top-support-left,
+    .ml-top-support-links {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .ml-top-support-bar a {
+        color: #fff;
+        text-decoration: none;
+        padding: 4px 9px;
+        border-radius: 20px;
+        transition: 0.25s ease;
+    }
+
+    .ml-top-support-bar a:hover {
+        background: rgba(255,255,255,0.18);
+        color: #fff;
+    }
+
+    .ml-navbar-horizontal {
+        position: fixed;
+        top: 34px;
+        left: 0;
+        width: 100%;
+        min-height: 62px;
+        background: var(--ml-nav-bg);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        z-index: 1040;
+        padding: 8px 24px;
+        border-bottom: 1px solid var(--ml-nav-border);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .ml-navbar-horizontal .ml-navbar-brand {
+        display: flex;
+        align-items: center;
+        padding: 0;
+    }
+
+    .ml-navbar-horizontal .ml-navbar-brand img {
+        height: 42px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    .ml-navbar-horizontal .navbar-nav {
+        align-items: center;
+        gap: 4px;
+    }
+
+    .ml-navbar-horizontal .nav-link {
+        color: var(--ml-nav-dark) !important;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 9px 11px !important;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        transition: 0.25s ease;
+        white-space: nowrap;
+    }
+
+    .ml-navbar-horizontal .nav-link i {
+        color: var(--ml-nav-primary);
+        font-size: 14px;
+    }
+
+    .ml-navbar-horizontal .nav-link:hover {
+        background: #eef8ff;
+        color: var(--ml-nav-primary) !important;
+        transform: translateY(-1px);
+    }
+
+    .ml-navbar-horizontal .navbar-toggler {
+        border: none;
+        background: #eef8ff;
+        border-radius: 10px;
+        padding: 8px 10px;
+        box-shadow: none !important;
+    }
+
+    .ml-navbar-horizontal .navbar-toggler:focus {
+        box-shadow: none !important;
+    }
+
+    @media (max-width: 1199px) {
+        .ml-navbar-horizontal {
+            padding: 8px 16px;
+        }
+
+        .ml-navbar-horizontal .nav-link {
+            font-size: 12px;
+            padding: 8px 8px !important;
+        }
+    }
+
+    @media (max-width: 991px) {
+        body.ml-navbar-page {
+            padding-top: 96px;
+        }
+
+        .ml-navbar-horizontal .navbar-collapse {
+            margin-top: 12px;
+            background: #fff;
+            border: 1px solid var(--ml-nav-border);
+            border-radius: 18px;
+            padding: 10px;
+            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.12);
+            max-height: calc(100vh - 115px);
+            overflow-y: auto;
+        }
+
+        .ml-navbar-horizontal .navbar-nav {
+            align-items: stretch;
+            gap: 6px;
+        }
+
+        .ml-navbar-horizontal .nav-link {
+            width: 100%;
+            justify-content: flex-start;
+            font-size: 14px;
+            padding: 11px 13px !important;
+            background: #f8fafc;
+        }
+
+        .ml-navbar-horizontal .nav-link:hover {
+            transform: none;
+        }
+    }
+
+    @media (max-width: 576px) {
+        body.ml-navbar-page {
+            padding-top: 112px;
+        }
+
+        .ml-top-support-bar {
+            min-height: 50px;
+            padding: 6px 12px;
+            flex-direction: column;
+            justify-content: center !important;
+            gap: 3px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .ml-top-support-links {
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .ml-top-support-bar a {
+            padding: 2px 6px;
+            font-size: 11px;
+        }
+
+        .ml-navbar-horizontal {
+            top: 50px;
+            min-height: 58px;
+            padding: 8px 12px;
+        }
+
+        .ml-navbar-horizontal .ml-navbar-brand img {
+            height: 34px;
+            max-width: 150px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("ml-navbar-page");
+    });
+</script>
+
+<div class="ml-top-support-bar d-flex justify-content-between align-items-center">
+    <div class="ml-top-support-left">
+        <i class="fas fa-user-circle"></i>
+        <span>Welcome, {{ bok.First_name }}</span>
+    </div>
+
+    <div class="ml-top-support-links">
+        <a href="mailto:aslamchirayil0001@gmail.com?subject=Support%20Request">
+            <i class="fas fa-headset"></i> Support
+        </a>
+        <a href="{% url 'update_employee' %}">
+            <i class="fas fa-user-cog"></i> Account
+        </a><!-- SIGN OUT BUTTON -->
+        <a href="#" id="logoutBtn" style="color: white;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+        
+        <!-- LOGOUT MODAL -->
+        <div class="logout-modal-overlay" id="logoutModal">
+            <div class="logout-modal-box">
+        
+                <!-- CLOSE BUTTON -->
+                <button class="close-modal-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+        
+                <!-- ICON -->
+                <div class="logout-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+        
+                <!-- TEXT -->
+                <h3>Keep Your Data Safe</h3>
+        
+                <p>
+                    Before Logout, make sure to backup your important <br>data
+                    to avoid accidental loss.
+                </p>
+        
+                <!-- BUTTONS -->
+                <div class="logout-modal-actions">
+        
+                    <!-- BACKUP & LOGOUT -->
+                    <button type="button" class="backup-btn" id="backupLogoutBtn">
+                        <i class="fas fa-database"></i>
+                        Backup & Logout
+                    </button>
+        
+                    <!-- LOGOUT -->
+                    <a href="/logout" class="logout-confirm-btn" style="color: #0f172a;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Will Do Later
+                    </a>
+        
+                </div>
+        
+            </div>
+        </div>
+        
+        <style>
+        
+        /* =========================
+           LOGOUT LINK
+        ========================= */
+        #logoutBtn{
+            text-decoration:none;
+            color:#374151;
+            font-weight:600;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            transition:0.3s;
+        }
+        
+        #logoutBtn:hover{
+            color:#ef4444;
+        }
+        
+        /* =========================
+           MODAL OVERLAY
+        ========================= */
+        .logout-modal-overlay{
+            position:fixed;
+            inset:0;
+            background:rgba(15,23,42,0.55);
+            backdrop-filter:blur(4px);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            z-index:99999;
+        
+            opacity:0;
+            visibility:hidden;
+            transition:0.3s ease;
+        }
+        
+        .logout-modal-overlay.show{
+            opacity:1;
+            visibility:visible;
+        }
+        
+        /* =========================
+           MODAL BOX
+        ========================= */
+        .logout-modal-box{
+            width:95%;
+            max-width:420px;
+            background:#ffffff;
+            border-radius:22px;
+            padding:32px 28px;
+            position:relative;
+            text-align:center;
+            box-shadow:0 25px 60px rgba(0,0,0,0.18);
+        
+            transform:translateY(20px) scale(0.96);
+            transition:0.3s ease;
+        }
+        
+        .logout-modal-overlay.show .logout-modal-box{
+            transform:translateY(0) scale(1);
+        }
+        
+        /* =========================
+           CLOSE BUTTON
+        ========================= */
+        .close-modal-btn{
+            position:absolute;
+            top:14px;
+            right:14px;
+            width:34px;
+            height:34px;
+            border:none;
+            border-radius:50%;
+            background:#f1f5f9;
+            color:#475569;
+            cursor:pointer;
+            transition:0.3s;
+        }
+        
+        .close-modal-btn:hover{
+            background:#e2e8f0;
+            transform:rotate(90deg);
+        }
+        
+        /* =========================
+           ICON
+        ========================= */
+        .logout-icon{
+            width:85px;
+            height:85px;
+            margin:auto;
+            border-radius:50%;
+            background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin-bottom:18px;
+        }
+        
+        .logout-icon i{
+            font-size:38px;
+            color:#2563eb;
+        }
+        
+        /* =========================
+           TEXT
+        ========================= */
+        .logout-modal-box h3{
+            font-size:26px;
+            font-weight:800;
+            color:#0f172a;
+            margin-bottom:12px;
+        }
+        
+        .logout-modal-box p{
+            font-size:15px;
+            color:#64748b;
+            line-height:1.7;
+            margin-bottom:28px;
+        }
+        
+        /* =========================
+           BUTTONS
+        ========================= */
+        .logout-modal-actions{
+            display:flex;
+            gap:14px;
+            flex-wrap:wrap;
+        }
+        
+        .logout-modal-actions a,
+        .logout-modal-actions button{
+            flex:1;
+            text-decoration:none;
+            padding:13px 16px;
+            border-radius:14px;
+            font-size:14px;
+            font-weight:700;
+            transition:0.3s ease;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            border:none;
+            cursor:pointer;
+        }
+        
+        /* =========================
+           BACKUP BUTTON
+        ========================= */
+        .backup-btn{
+            background:#2563eb;
+            color:#fff;
+        }
+        
+        .backup-btn:hover{
+            background:#1d4ed8;
+            transform:translateY(-2px);
+        }
+        
+        /* =========================
+           LOGOUT BUTTON
+        ========================= */
+        .logout-confirm-btn{
+            background:#f1f5f9;
+            color:#0f172a;
+        }
+        
+        .logout-confirm-btn:hover{
+            background:#e2e8f0;
+            transform:translateY(-2px);
+        }
+        
+        /* =========================
+           MOBILE
+        ========================= */
+        @media(max-width:576px){
+        
+            .logout-modal-box{
+                padding:26px 20px;
+                border-radius:18px;
+            }
+        
+            .logout-modal-box h3{
+                font-size:22px;
+            }
+        
+            .logout-modal-actions{
+                flex-direction:column;
+            }
+        
+            .logout-modal-actions a,
+            .logout-modal-actions button{
+                width:100%;
+            }
+        }
+        
+        </style>
+        
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        
+            const logoutBtn = document.getElementById("logoutBtn");
+            const logoutModal = document.getElementById("logoutModal");
+            const closeModal = document.getElementById("closeModal");
+            const backupLogoutBtn = document.getElementById("backupLogoutBtn");
+        
+            // OPEN MODAL
+            logoutBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                logoutModal.classList.add("show");
+            });
+        
+            // CLOSE MODAL
+            closeModal.addEventListener("click", function () {
+                logoutModal.classList.remove("show");
+            });
+        
+            // CLOSE WHEN CLICK OUTSIDE
+            logoutModal.addEventListener("click", function (e) {
+                if (e.target === logoutModal) {
+                    logoutModal.classList.remove("show");
+                }
+            });
+        
+            // BACKUP & LOGOUT
+            backupLogoutBtn.addEventListener("click", function () {
+        
+                // START DOWNLOAD
+                window.location.href = "{% url 'download_database' %}";
+        
+                // LOGOUT AFTER 2 SECONDS
+                setTimeout(function () {
+                    window.location.href = "/logout";
+                }, 2000);
+        
+            });
+        
+        });
+        </script>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg ml-navbar-horizontal">
+    <a class="ml-navbar-brand" href="/dashboard">
+        <img src="{% static 'logo.png' %}" alt="Microlab Logo">
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mlNavbarNav"
+            aria-controls="mlNavbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mlNavbarNav">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="/view_consumed_orders"><i class="fas fa-chart-line"></i> Add Consumption</a></li>
+            <li class="nav-item"><a class="nav-link" href="/custom_consumed"><i class="fas fa-file-invoice"></i> View Consumed</a></li>
+            <li class="nav-item"><a class="nav-link" href="/company_list"><i class="fas fa-building"></i> Add Purchase Order</a></li>
+            <li class="nav-item"><a class="nav-link" href="/view_purchase_orders"><i class="fas fa-file-invoice"></i> View Purchase Order</a></li>
+            <li class="nav-item"><a class="nav-link" href="/placed_orders"><i class="fas fa-box"></i> Placed Orders</a></li>
+            <li class="nav-item"><a class="nav-link" href="/vendor_list"><i class="fas fa-users"></i> Vendor List</a></li>
+            <li class="nav-item"><a class="nav-link" href="/item_list"><i class="fas fa-cubes"></i> Item List</a></li>
+            <li class="nav-item"><a class="nav-link" href="/download_database"><i class="fas fa-database"></i> Backup Data</a></li>
+        </ul>
+    </div>
+</nav>

@@ -1,0 +1,83 @@
+{% include 'admin_navbar.html' %}
+<body style="background-color: #edf0f6;">
+
+    <!-- Main Content -->
+    <div class="main-content">
+  <!-- Main Content -->
+  <div >
+    <div class=" d-flex justify-content-between ">
+      <h4>Vendor Management</h4>
+  
+    </div>
+
+    <br>
+
+
+              
+
+    <div class="table-responsive">
+        <table class="table align-middle table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th style="background-color: aliceblue;color:black"> Sl No</th>
+                    <th style="background-color: aliceblue;color:black"> Branch</th>
+                    <th  style="background-color: aliceblue;color:black">Vendor Name</th>
+                    <th  style="background-color: aliceblue;color:black">Mobile Number</th>
+                    <th  style="background-color: aliceblue;color:black">Email</th>
+                    <th  style="background-color: aliceblue;color:black">Address</th>
+                    <th  style="background-color: aliceblue;color:black">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if vendors %}
+                    {% for vendor in vendors|dictsortreversed:"id" %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td>{{ vendor.user.username }}</td>
+                        <td>{{ vendor.name }}</td>
+                        <td>{{ vendor.mobile_number }}</td>
+                        <td>{{ vendor.email }}</td>
+                        <td>{{ vendor.address }}</td>
+                        <td class="text-center">
+                          
+                            <form method="post" action="{% url 'vendor_delete_admin' vendor.id %}" class="d-inline" id="delete-form-{{ vendor.id }}">
+                                {% csrf_token %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete({{ vendor.id }})">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No vendors found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(vendorId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + vendorId).submit();
+            }
+        });
+    }
+</script>
+
+<!-- Optionally include Bootstrap Icons if not already loaded -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">

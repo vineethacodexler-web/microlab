@@ -1,0 +1,352 @@
+{% include 'admin_navbar.html' %}
+<body style="background-color: #edf0f6;">
+
+<div class="main-content">
+    <style>
+        /* Main Layout */
+        .main-content {
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* Top bar */
+        .topbar {
+            margin-bottom: 25px;
+        }
+
+        .topbar h4 {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Buttons */
+        .btn-success, .filter-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* Table Styles */
+        .table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle !important;
+        }
+
+        thead.table-primary {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Filter Styles */
+        .filters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            min-width: 180px;
+        }
+
+        .filter-item label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .filter-buttons {
+            display: grid;
+            grid-auto-flow: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .clear-btn {
+            background-color: #6c757d;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-buttons button {
+            margin: 0 4px;
+        }
+
+        .entry-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .filter-item {
+                flex: 1 1 100%;
+            }
+
+            .filter-buttons {
+                flex-direction: row;
+                gap: 1rem;
+            }
+        }
+    </style>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center">
+        <h4>Purchase Order</h4>
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search..." class="form-control w-25">
+    </div>
+
+    <!-- Filters -->
+    <form method="get" class="filters-container">
+        <div class="filter-item">
+            <label for="dateRangeFilter">Date Range</label>
+            <select name="date_range" id="dateRangeFilter">
+                <option value="daily" {% if request.GET.date_range == 'daily' or not request.GET.date_range %}selected{% endif %}>Daily</option>
+                <option value="weekly" {% if request.GET.date_range == 'weekly' %}selected{% endif %}>Weekly</option>
+                <option value="monthly" {% if request.GET.date_range == 'monthly' %}selected{% endif %}>Monthly</option>
+                <option value="custom" {% if request.GET.date_range == 'custom' %}selected{% endif %}>Custom</option>
+            </select>
+        </div>
+
+        <div id="customDateFields" style="display: none;" class="d-flex">
+            <div class="filter-item">
+                <label for="startDateFilter">Start Date</label>
+                <input type="date" name="start_date" id="startDateFilter" value="{{ request.GET.start_date }}">
+            </div>
+            <div class="filter-item">
+                <label for="endDateFilter">End Date</label>
+                <input type="date" name="end_date" id="endDateFilter" value="{{ request.GET.end_date }}">
+            </div>
+        </div>
+
+        <div class="filter-item">
+            <label for="vendorFilter">Vendor</label>
+            <select name="vendor" id="vendorFilter" class="scrollable-select">
+                <option value="">All Vendors</option>
+                {% for vendor in vendors %}
+                    <option value="{{ vendor.name }}" {% if request.GET.vendor == vendor.name %}selected{% endif %}>{{ vendor.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-buttons">
+            <button type="submit" class="filter-btn">Filter</button>
+            <button type="button" class="filter-btn clear-btn" onclick="location.href='{% url 'view_po' %}'">Clear</button>
+        </div>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateRangeSelect = document.getElementById('dateRangeFilter');
+            const customDateFields = document.getElementById('customDateFields');
+
+            function toggleDateFields() {
+                customDateFields.style.display = dateRangeSelect.value === 'custom' ? 'flex' : 'none';
+            }
+
+            toggleDateFields();
+            dateRangeSelect.addEventListener('change', toggleDateFields);
+        });
+    </script>
+
+    <!-- Orders Table -->
+    <div class="table-responsive">
+        <table class="table align-middle table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>Branch</th>
+                    <th>Vendor</th>
+                    <th>Company</th>
+                    <th>Item</th>
+                    <th>HSN</th>
+                    <th>Pack</th>
+                    <th>Price</th>
+                    <th>GST</th>
+                    <th>QTY</th>
+                    <th>Rate</th>
+                    <th>Total</th>
+                    <th colspan="2">Action</th>
+                </tr>
+            </thead>
+            <tbody id="orders-body">
+                {% regroup orders by vendor as vendor_list %}
+                {% for group in vendor_list reversed %}
+                    {% for item in group.list reversed %}
+                        <tr data-vendor-id="{{ item.vendor.id }}" data-vendor-name="{{ item.vendor.name }}">
+                            {% if forloop.first %}
+                                <td rowspan="{{ group.list|length }}">{{ item.user.username }}</td>
+                                <td rowspan="{{ group.list|length }}">{{ group.grouper.name }}</td>
+                            {% endif %}
+                            {% if not forloop.first %}
+                                <td style="display:none"></td>
+                                <td style="display:none"></td>
+                            {% endif %}
+                            <td>{{ item.company }}</td>
+                            <td>{{ item.item.name }}</td>
+                            <td>{{ item.hsn }}</td>
+                            <td>{{ item.pack }}</td>
+                            <td>{{ item.price }}</td>
+                            <td>{{ item.gst }}</td>
+                            <td>{{ item.qty }}</td>
+                            <td>{{ item.amount }}</td>
+                            <td class="total-amount">{{ item.total_amount }}</td>
+                            <td>
+                                <form action="{% url 'purchase_order_item_delete' pk=item.pk %}" method="post" class="delete-form" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-container">
+        <div class="entry-selector">
+            <label for="entries">Show</label>
+            <select id="entries" class="form-select form-select-sm w-auto" onchange="updateEntries()">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <span>entries</span>
+        </div>
+        <div id="pagination" class="pagination-buttons"></div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Subtotals
+        const rows = document.querySelectorAll('#orders-body tr[data-vendor-id]');
+        const vendorGroups = {};
+
+        rows.forEach(row => {
+            const vendorId = row.getAttribute('data-vendor-id');
+            if (!vendorGroups[vendorId]) vendorGroups[vendorId] = [];
+            vendorGroups[vendorId].push(row);
+        });
+
+        Object.values(vendorGroups).forEach(groupRows => {
+            let subtotal = 0;
+            groupRows.forEach(row => {
+                const totalCell = row.querySelector('.total-amount');
+                subtotal += parseFloat(totalCell.textContent) || 0;
+            });
+
+            const vendorName = groupRows[0].getAttribute('data-vendor-name');
+            const subtotalRow = document.createElement('tr');
+            subtotalRow.style.backgroundColor = '#e6f2ff';
+            subtotalRow.style.fontWeight = 'bold';
+            subtotalRow.innerHTML = `
+                <td colspan="10" class="text-end">Subtotal for ${vendorName}</td>
+                <td>${subtotal.toFixed(2)}</td>
+                <td></td>
+            `;
+            groupRows[groupRows.length - 1].after(subtotalRow);
+        });
+
+        // Delete confirmation
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) form.submit();
+                });
+            });
+        });
+
+        paginate();
+    });
+
+    function filterTable() {
+        const input = document.getElementById("searchInput").value.toLowerCase();
+        const rows = document.querySelectorAll("#orders-body tr");
+        rows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+        });
+        paginate();
+    }
+
+    let currentPage = 1;
+    let rowsPerPage = parseInt(document.getElementById("entries").value);
+
+    function paginate() {
+        const rows = Array.from(document.querySelectorAll("#orders-body tr")).filter(r => r.style.display !== 'none');
+        const pagination = document.getElementById("pagination");
+        const totalPages = Math.ceil(rows.length / rowsPerPage);
+
+        currentPage = Math.min(currentPage, totalPages) || 1;
+
+        rows.forEach((row, i) => {
+            row.style.display = (i >= (currentPage - 1) * rowsPerPage && i < currentPage * rowsPerPage) ? "" : "none";
+        });
+
+        pagination.innerHTML = "";
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.className = 'btn btn-outline-primary btn-sm';
+            if (i === currentPage) btn.classList.add('active');
+            btn.innerText = i;
+            btn.onclick = () => {
+                currentPage = i;
+                paginate();
+            };
+            pagination.appendChild(btn);
+        }
+    }
+
+    function updateEntries() {
+        rowsPerPage = parseInt(document.getElementById("entries").value);
+        currentPage = 1;
+        paginate();
+    }
+
+    window.onload = paginate;
+</script>

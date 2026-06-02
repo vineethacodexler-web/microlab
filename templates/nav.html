@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
+    .sidebar {
+      width: 215px;
+      height: 100vh;
+      background-color: #001F3F;
+      color: white;
+      padding-top: 1rem;
+      position: fixed;
+      left: 0;
+      top: 30px;
+      transition: transform 0.3s ease-in-out;
+    }
+    .sidebar.hide {
+      transform: translateX(-100%);
+    }
+    .sidebar .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      padding: 7px;
+    }
+    .sidebar ul li a {
+      text-decoration: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s;
+       padding:5px;
+
+    }
+    .sidebar ul li a:hover {
+      background-color: #0B666A;
+      padding:5px;
+
+    }
+    .dropdown {
+  display: none;
+  background-color: #444;
+  flex-direction: column;
+  width: 100%;
+}
+
+.dropdown a {
+  padding: 10px;
+}
+
+.sidebar ul li {
+  position: relative;
+
+}
+
+.sidebar ul li .dropdown.active {
+  display: flex;
+}
+
+    .content {
+      margin-left: 215px;
+      padding: 5px;
+      width: 100%;
+      margin-top: 5px;;
+      transition: margin-left 0.3s ease-in-out;
+    }
+    .collapsed {
+      margin-left: 0 !important;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      .content {
+        margin-left: 0;
+      }
+    }
+    .header {
+      background-color: #0B666A;
+      color: white;
+      padding: 0px 20px;
+      display: flex;
+      align-items: center;
+
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+    .header .user-settings {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header .user-settings a {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+    }
+    .menu-toggle {
+      font-size: 15px;
+      cursor: pointer;
+      padding: 8px;
+      color: white;
+      background-color: #0B666A;
+      text-align: right;
+      top: 10px;
+      margin-left: -40px;
+ 
+    }
+  </style>
+</head>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const sidebarItems = document.querySelectorAll(".sidebar ul li");
+  
+    sidebarItems.forEach((item) => {
+      item.addEventListener("click", function (event) {
+        event.stopPropagation(); // Prevent event bubbling
+  
+        let dropdown = this.querySelector(".dropdown");
+        if (dropdown) {
+          dropdown.classList.toggle("active");
+        }
+      });
+    });
+  });
+  </script>
+  
+<body>
+  <header class="header">
+    <img src="/media/{{bok.Image}}" width="25px" height="25px" alt="">&nbsp;&nbsp;
+    <div>{{bok.First_name}} {{bok.Last_name}}</div>&nbsp;&nbsp;&nbsp;&nbsp;
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="menu-toggle" id="menu-toggle">☰</div>&nbsp;&nbsp;
+    {% if bok.gst_num %}
+    <p style="font-size:20px;">GST Number: {{ bok.gst_num }}</p>
+  {% endif %}
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        .custom-user-settings {
+            position: absolute;
+            top: 10px;
+            align-items: center;
+            right: 20px;
+            font-family: Arial, sans-serif;
+        }
+    
+        .custom-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+    
+        .custom-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 150px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+    
+        .custom-dropdown-content a {
+            color: black;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            transition: 0.3s;
+        }
+    
+        .custom-dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+    
+        .custom-dropdown:hover .custom-dropdown-content {
+            display: block;
+       
+        }
+    
+        .custom-dropbtn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+    
+    <div class="custom-user-settings">
+        <div class="custom-dropdown">
+            <button style="color:white;" class="custom-dropbtn"><i class="fas fa-gear"></i> Settings</button>
+            <div class="custom-dropdown-content">
+                <a href="{% url 'edit_admin' %}"><i class="fas fa-user"></i> Profile</a>
+       
+                <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </div>
+       
+    
+  </header>
+  
+<nav class="sidebar" id="sidebar">
+  <ul>
+    <li><a href="{% url 'admin_home' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+    <!-- <li><a href="{% url 'quotation_list' %}"><i class="fas fa-file-invoice"></i> Estimate/Quotation</a></li> -->
+    <!-- <li>
+      <a href="#"><i class="fas fa-shopping-cart"></i> Sales &#9662;</a>
+      <div class="dropdown">
+        <a href="{% url 'create_invoice' %}">New Sale Order</a>
+        <a href="{% url 'add_credit_note_detail' %}">Sales Return / Credit Note</a>
+      </div>
+    </li> -->
+    <!-- <li>
+      <a href="#"><i class="fas fa-truck"></i> Purchase &#9662;</a>
+      <div class="dropdown">
+        <a href="{% url 'create_purchase_order' %}">New Purchase Order</a>
+        <a href="{% url 'add_debit_note_detail' %}">Purchase Return / Debit Note</a>
+      </div>
+    </li> -->
+    <li><a href="{% url 'create_purchase_memo' %}"><i class="fas fa-tachometer-alt"></i> Purchase Memo</a></li>
+
+    <li><a href="{% url 'purchase_order_list' %}"><i class="fas fa-tachometer-alt"></i> Report</a></li>
+    <!-- <li>
+      <a href="#"><i class="fas fa-file-invoice-dollar"></i> Reports &#9662;</a>
+      <div class="dropdown">
+        <a href="{% url 'invoice_list' %}">Sales</a>
+        <a href="{% url 'purchase_order_list' %}">Purchase</a>
+      </div>
+    </li> -->
+    <li>
+      <a href="#"><i class="fas fa-box"></i> Inventory &#9662;</a>
+      <div class="dropdown">
+        <a href="{% url 'inventory_list' %}">Update Stock</a>
+        <a href="{% url 'inventory_log_list' %}">Logs</a>
+      </div>
+    </li>
+
+    <!-- <li>
+      <a href="#"><i class="fas fa-hand-holding-usd"></i> Cash Book &#9662;</a>
+      <div class="dropdown">
+        <a href="{% url 'customer_book' %}">Customer Book</a>
+        <a href="{% url 'vendor_book' %}">Supplier Book</a>
+      </div>
+    </li> -->
+   
+    <li><a href="{% url 'expense_list' %}"><i class="fas fa-money-bill"></i> Expenses</a></li>
+    <!-- <li><a href="{% url 'customer_list' %}"><i class="fas fa-users"></i> CRM</a></li> -->
+    <li><a href="{% url 'product_list' %}"><i class="fas fa-boxes"></i> Items</a></li>
+    <li><a href="{% url 'vendor_list' %}"><i class="fas fa-truck-moving"></i> Vendors</a></li>
+    
+  </ul>
+</nav>
+
+
+<script>
+document.getElementById('menu-toggle').addEventListener('click', function () {
+  let sidebar = document.getElementById('sidebar');
+  let content = document.getElementById('content');
+
+  sidebar.classList.toggle('hide');
+  content.classList.toggle('collapsed');
+});
+</script>
+
+
+</body>
+</html>

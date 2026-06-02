@@ -1,0 +1,361 @@
+{% include 'links.html' %}
+{% include 'navbar3.html' %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            color: #0f172a;
+        }
+
+        .account-page-wrapper {
+            width: 100%;
+            padding: 3px;
+        }
+
+        .account-form-box {
+            width: 100%;
+            background: #ffffff;
+
+            padding: 28px;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #e5e7eb;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .page-header h2 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-header p {
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-span-3 {
+            grid-column: span 3;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            border: 1px solid #dbe3ef;
+            border-radius: 14px;
+            background: #f8fafc;
+            padding: 13px 15px;
+            font-size: 14px;
+            color: #0f172a;
+            outline: none;
+            transition: 0.25s ease;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #2563eb;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+        }
+
+        .button-area {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+
+        .btn-modern {
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.25s ease;
+            text-decoration: none;
+        }
+
+        .btn-update {
+            background: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+        }
+
+        .btn-update:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .btn-clear:hover {
+            background: #d1d5db;
+            transform: translateY(-2px);
+        }
+
+        .toast {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 1200px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .col-span-3 {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .account-page-wrapper {
+                padding: 85px 14px 20px;
+            }
+
+            .account-form-box {
+                padding: 20px;
+                border-radius: 16px;
+            }
+
+            .page-header h2 {
+                font-size: 22px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .col-span-3 {
+                grid-column: span 1;
+            }
+
+            .button-area {
+                justify-content: center;
+            }
+
+            .btn-modern {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% if messages %}
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+    <div class="toast align-items-center text-white bg-{{ message.tags }} border-0 show" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="account-page-wrapper">
+
+    <div class="account-form-box">
+
+        <div class="page-header">
+            <div>      
+                <button type="button"
+                class="btn-modern btn-back"
+                onclick="window.location.href='{% url 'employee_home' %}'">
+  
+            <i class="fa-solid fa-arrow-left"></i>
+            Back
+        </button>
+        <br>  <br>
+                <h2>
+                    <i class="fas fa-user-cog"></i>
+                    Account Settings
+                </h2>
+                <p>Manage and update your branch profile details</p>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="first_name">Branch Name</label>
+                    <input type="text"
+                           name="first_name"
+                           id="first_name"
+                           value="{{ bok.First_name }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email"
+                           name="email"
+                           id="email"
+                           value="{{ bok.Email }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobile">Mobile Number</label>
+                    <input type="text"
+                           name="mobile"
+                           id="mobile"
+                           value="{{ bok.Mobile_Number }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="gst_num">GST Number</label>
+                    <input type="text"
+                           name="gst_num"
+                           id="gst_num"
+                           value="{{ bok.gst_num }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Branch Location</label>
+                    <select name="loc" id="location" required>
+                        <option value="" disabled>Select a branch</option>
+                        {% for branch in branch %}
+                        <option value="{{ branch.id }}"
+                            {% if bok.loc and bok.loc.id == branch.id %}selected{% endif %}>
+                            {{ branch.location }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="user_name">Username</label>
+                    <input type="text"
+                           name="user_name"
+                           id="user_name"
+                           value="{{ um.username }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="psw">New Password</label>
+                    <input type="text"
+                           name="psw"
+                           id="psw"
+                           value="{{ bok.Password }}"
+                           required>
+                </div>
+
+                <div class="form-group col-span-3">
+                    <label for="addres">Address</label>
+                    <textarea name="addres"
+                              id="addres"
+                              rows="4"
+                              required>{{ bok.address }}</textarea>
+                </div>
+
+            </div>
+
+            <div class="button-area">
+                <button type="submit" class="btn-modern btn-update">
+                    <i class="fas fa-save"></i>
+                    Update Profile
+                </button>
+
+                <button type="reset" class="btn-modern btn-clear">
+                    <i class="fas fa-rotate-right"></i>
+                    Clear
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    toastElList.map(function (toastEl) {
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+
+{% include 'admin_navbar.html' %}
+ <!-- Main Content -->
+ <div class="main-content">
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Admin Purchase Dashboard</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Qty</h5>
+                    <p class="card-text">{{ totals.total_qty|default:"0" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Amount</h5>
+                    <p class="card-text">₹ {{ totals.total_amount|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total CGST</h5>
+                    <p class="card-text">₹ {{ totals.total_cgst|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total SGST</h5>
+                    <p class="card-text">₹ {{ totals.total_sgst|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="mt-5">Recent Purchase Orders</h4>
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Item</th>
+                <th>Vendor</th>
+                <th>Company</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.created_at }}</td>
+                <td>{{ item.item.name }}</td>
+                <td>{{ item.vendor.name }}</td>
+                <td>{{ item.company }}</td>
+                <td>{{ item.qty }}</td>
+                <td>₹{{ item.price }}</td>
+                <td>₹{{ item.total_amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
