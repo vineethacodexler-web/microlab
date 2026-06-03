@@ -793,9 +793,20 @@ def employee_home(request):
         total_invoice_cgst=Sum('total_cgst'),
         total_invoice_amount=Sum('total_amount'),
     )
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+
+    pending_invoice = MonthlyInvoice.objects.filter(
+        user=request.user,
+        status='Pending'
+    ).exclude(
+        month=current_month,
+        year=current_year
+    ).order_by('-year', '-month').first()
 
     # ------------------- Context -------------------
     context = {
+        'pending_invoice': pending_invoice,
         'bok': bok,
         'k': gtt,
         'gtt': gtt,
@@ -6163,33 +6174,44 @@ def log_usage(user, activity_code, qty=1):
         pass
 
 
+from datetime import datetime
+import calendar
+
 def branch_billing_summary(request):
 
-    branches = User.objects.filter(
-        registration__User_role='employee'
+    selected_month = request.GET.get('month')
+    selected_year = request.GET.get('year')
+
+    if not selected_month:
+        selected_month = datetime.now().month
+
+    if not selected_year:
+        selected_year = datetime.now().year
+
+    invoices = MonthlyInvoice.objects.filter(
+        month=selected_month,
+        year=selected_year
+    ).select_related('user')
+
+    months = [
+        (i, calendar.month_name[i])
+        for i in range(1, 13)
+    ]
+
+    years = range(
+        datetime.now().year - 2,
+        datetime.now().year + 3
     )
-
-    branch_data = []
-
-    for branch in branches:
-
-        total_due = UsageLog.objects.filter(
-            user=branch
-        ).aggregate(
-            total=Sum('total_charge')
-        )['total'] or 0
-
-        branch_data.append({
-            'branch': branch,
-            'total_due': total_due
-        })
-    print(branch_data,"branchhhh")
 
     return render(
         request,
         'billing/branch_billing_summary.html',
         {
-            'branch_data': branch_data
+            'invoices': invoices,
+            'months': months,
+            'years': years,
+            'selected_month': int(selected_month),
+            'selected_year': int(selected_year),
         }
     )
 
@@ -6236,7 +6258,6 @@ def generate_monthly_invoices(request):
     )
 
     for branch in branches:
-
         total = UsageLog.objects.filter(
             user=branch,
             created_at__month=month,
@@ -6245,14 +6266,14 @@ def generate_monthly_invoices(request):
             total=Sum('total_charge')
         )['total'] or 0
 
-        MonthlyInvoice.objects.get_or_create(
+        invoice, created = MonthlyInvoice.objects.get_or_create(
             user=branch,
             month=month,
-            year=year,
-            defaults={
-                'total_amount': total
-            }
+            year=year
         )
+
+        invoice.total_amount = total
+        invoice.save()
 
     messages.success(
         request,

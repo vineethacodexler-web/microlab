@@ -339,40 +339,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             </div>
         </div>
-<!-- {% if bok.payment_status == "False" %}-->
-<!--<div class="payment-warning">-->
-<!--    ⚠ Your payment is pending. Please complete it to avoid service interruption.-->
-<!--    <a href="/payment/" class="pay-btn">Pay Now</a>-->
-<!--</div>-->
+{% if pending_invoice %}
 
-<!--<style>-->
-<!--.payment-warning {-->
-<!--    width: 100%;-->
-<!--    background: #ff4d4d;-->
-<!--    color: white;-->
-<!--    text-align: center;-->
-<!--    padding: 12px;-->
-<!--    font-weight: bold;-->
-<!--    position: sticky;-->
-<!--    top: 0;-->
-<!--    z-index: 9999;-->
-<!--}-->
+<div class="alert alert-danger">
 
-<!--.payment-warning .pay-btn {-->
-<!--    margin-left: 15px;-->
-<!--    background: white;-->
-<!--    color: #ff4d4d;-->
-<!--    padding: 5px 12px;-->
-<!--    border-radius: 5px;-->
-<!--    text-decoration: none;-->
-<!--    font-weight: bold;-->
-<!--}-->
+    <strong>
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Billing Alert
+    </strong>
 
-<!--.payment-warning .pay-btn:hover {-->
-<!--    background: #ffe6e6;-->
-<!--}-->
-<!--</style>-->
-<!--{% endif %}-->
+    <br>
+
+    You have an unpaid invoice for
+
+    <strong>
+        {{ pending_invoice.get_month_display }}
+        {{ pending_invoice.year }}
+    </strong>
+
+    .
+
+    Please contact the administrator to complete payment.
+
+</div>
+
+{% endif %}
         <div class="filter-section">
             <div class="row align-items-center g-3">
                 <div class="col-lg-5 col-md-12">

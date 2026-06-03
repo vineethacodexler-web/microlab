@@ -2,13 +2,64 @@
 
 <div class="main-content">
 
-    <div class="card">
+    <div class="card-body">
 
-        <div class="card-header">
-            Branch Billing Summary
+    <form method="GET" class="row mb-3">
+
+        <div class="col-md-4">
+
+            <label>Month</label>
+
+            <select name="month" class="form-control">
+
+                {% for value,name in months %}
+
+                <option value="{{ value }}"
+                    {% if value == selected_month %}
+                        selected
+                    {% endif %}
+                >
+                    {{ name }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
         </div>
 
-        <div class="card-body">
+        <div class="col-md-4">
+
+            <label>Year</label>
+
+            <select name="year" class="form-control">
+
+                {% for year in years %}
+
+                <option value="{{ year }}"
+                    {% if year == selected_year %}
+                        selected
+                    {% endif %}
+                >
+                    {{ year }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+        <div class="col-md-4 mt-4">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Filter
+            </button>
+
+        </div>
+
+    </form>
 
             <table class="table table-bordered">
 
@@ -20,34 +71,72 @@
                     </tr>
                 </thead>
 
-                <tbody>
+               <tbody>
 
-                {% for item in branch_data %}
+{% for invoice in invoices %}
 
-                    <tr>
+<tr>
 
-                        <td>
-                            {{ item.branch.registration.First_name }}
-                        </td>
+    <td>
+        {{ invoice.user.registration.First_name }}
+    </td>
 
-                        <td>
-                            ₹ {{ item.total_due }}
-                        </td>
+    <td>
+        {{ invoice.get_month_display }}
+    </td>
 
-                        <td>
+    <td>
+        {{ invoice.year }}
+    </td>
 
-                            <a href="{% url 'branch_billing_detail' item.branch.id %}"
-   class="btn btn-primary btn-sm">
-    View Details
-</a>
+    <td>
+        ₹ {{ invoice.total_amount }}
+    </td>
 
-                        </td>
+    <td>
 
-                    </tr>
+        {% if invoice.status == 'Paid' %}
 
-                {% endfor %}
+        <span class="badge bg-success">
+            Paid
+        </span>
 
-                </tbody>
+        {% else %}
+
+        <span class="badge bg-danger">
+            Pending
+        </span>
+
+        {% endif %}
+
+    </td>
+
+    <td>
+
+        <a href="{% url 'branch_billing_detail' invoice.user.id %}?month={{ invoice.month }}&year={{ invoice.year }}"
+           class="btn btn-primary btn-sm">
+
+            View Details
+
+        </a>
+
+    </td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+
+    <td colspan="6" class="text-center">
+        No invoices found
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
 
             </table>
 

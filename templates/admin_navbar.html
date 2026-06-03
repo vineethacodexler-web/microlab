@@ -152,16 +152,17 @@
    class="{% if request.path == usage_logs_url %}active{% endif %}">
     <i class="bi bi-clock-history me-2"></i>Usage Logs
 </a>
-    {% url 'branch_billing_summary' as branch_billing_summary_url %}
-<a href="{{ branch_billing_summary_url }}"
-   class="{% if request.path == branch_billing_summary_url %}active{% endif %}">
-    <i class="bi bi-receipt me-2"></i>Branch Billing
-</a>
     {% url 'monthly_invoice_list' as monthly_invoice_list_url %}
 <a href="{{ monthly_invoice_list_url }}"
    class="{% if request.path == monthly_invoice_list_url %}active{% endif %}">
     <i class="bi bi-receipt me-2"></i>Monthly Invoices
 </a>
+    {% url 'branch_billing_summary' as branch_billing_summary_url %}
+<a href="{{ branch_billing_summary_url }}"
+   class="{% if request.path == branch_billing_summary_url %}active{% endif %}">
+    <i class="bi bi-receipt me-2"></i>Branch Billing
+</a>
+
     {% url 'logout' as logout_url %}
     <a href="{{ logout_url }}" class="{% if request.path == logout_url %}active{% endif %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
   </div>

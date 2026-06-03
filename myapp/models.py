@@ -317,7 +317,7 @@ class UsageLog(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.activity.name}"
 
-
+import calendar
 
 class MonthlyInvoice(models.Model):
 
@@ -373,6 +373,9 @@ class MonthlyInvoice(models.Model):
             'month',
             'year'
         )
+
+    def get_month_display(self):
+        return calendar.month_name[self.month]
 
 
 class PaymentCollection(models.Model):
