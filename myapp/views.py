@@ -6247,58 +6247,97 @@ def branch_billing_detail(request, user_id):
         }
     )
 
+from datetime import datetime
 
 def generate_monthly_invoices(request):
 
-    month = datetime.now().month
-    year = datetime.now().year
+    if request.method == "POST":
 
-    branches = User.objects.filter(
-        registration__User_role='employee'
-    )
+        month = int(request.POST.get('month'))
+        year = int(request.POST.get('year'))
 
-    for branch in branches:
-        total = UsageLog.objects.filter(
-            user=branch,
-            created_at__month=month,
-            created_at__year=year
-        ).aggregate(
-            total=Sum('total_charge')
-        )['total'] or 0
-
-        invoice, created = MonthlyInvoice.objects.get_or_create(
-            user=branch,
-            month=month,
-            year=year
+        branches = User.objects.filter(
+            registration__User_role='employee'
         )
 
-        invoice.total_amount = total
-        invoice.save()
+        generated_count = 0
 
-    messages.success(
-        request,
-        "Monthly invoices generated successfully."
-    )
+        for branch in branches:
 
-    return redirect(
-        'monthly_invoice_list'
-    )
+            total = UsageLog.objects.filter(
+                user=branch,
+                created_at__month=month,
+                created_at__year=year
+            ).aggregate(
+                total=Sum('total_charge')
+            )['total'] or 0
+
+            MonthlyInvoice.objects.update_or_create(
+                user=branch,
+                month=month,
+                year=year,
+                defaults={
+                    'total_amount': total
+                }
+            )
+
+            generated_count += 1
+
+        messages.success(
+            request,
+            f"{generated_count} invoices generated for {calendar.month_name[month]} {year}"
+        )
+
+    return redirect('monthly_invoice_list')
+
+import calendar
+from datetime import datetime
+
+import calendar
+from datetime import datetime
 
 def monthly_invoice_list(request):
 
-    invoices = MonthlyInvoice.objects.select_related(
-        'user'
-    ).order_by(
-        '-year',
-        '-month'
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+
+    selected_month = request.GET.get('month')
+    selected_year = request.GET.get('year')
+
+    if selected_month:
+        selected_month = int(selected_month)
+    else:
+        selected_month = current_month
+
+    if selected_year:
+        selected_year = int(selected_year)
+    else:
+        selected_year = current_year
+
+    invoices = MonthlyInvoice.objects.filter(
+        month=selected_month,
+        year=selected_year
+    ).select_related('user').order_by('user__username')
+
+    months = [
+        (i, calendar.month_name[i])
+        for i in range(1, 13)
+    ]
+
+    years = range(
+        current_year - 3,
+        current_year + 3
     )
-    print(invoices,"invv")
 
     return render(
         request,
         'billing/monthly_invoice_list.html',
         {
-            'invoices': invoices
+            'invoices': invoices,
+            'months': months,
+            'years': years,
+            'selected_month': selected_month,
+            'selected_year': selected_year,
         }
     )
 

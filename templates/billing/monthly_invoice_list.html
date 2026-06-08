@@ -2,83 +2,256 @@
 
 <div class="main-content">
 
-    <div class="d-flex justify-content-between mb-3">
+    <!-- Generate Invoice Card -->
 
-        <h4>Monthly Invoices</h4>
+<div class="card shadow-sm mb-3">
+    <div class="card-body py-3">
 
-        <a href="{% url 'generate_monthly_invoices' %}"
-           class="btn btn-success">
+        <div class="row g-3 align-items-end">
 
-            Generate Current Month Invoice
+            <!-- Generate Invoice -->
+            <div class="col-lg-6">
 
-        </a>
+                <form method="POST"
+                      action="{% url 'generate_monthly_invoices' %}">
+
+                    {% csrf_token %}
+
+                    <div class="row g-2">
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">
+                                Generate Month
+                            </label>
+
+                            <select name="month"
+                                    class="form-select form-select-sm"
+                                    required>
+
+                                {% for value,name in months %}
+                                <option value="{{ value }}">
+                                    {{ name }}
+                                </option>
+                                {% endfor %}
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">
+                                Year
+                            </label>
+
+                            <select name="year"
+                                    class="form-select form-select-sm"
+                                    required>
+
+                                {% for year in years %}
+                                <option value="{{ year }}">
+                                    {{ year }}
+                                </option>
+                                {% endfor %}
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <button type="submit"
+                                    class="btn btn-success btn-sm w-100 " style="visibility:hidden;">
+
+                                <i class="bi bi-file-earmark-plus"></i>
+                                Generate
+
+                            </button>
+                             <button type="submit"
+                                    class="btn btn-success btn-sm w-100">
+
+                                <i class="bi bi-file-earmark-plus"></i>
+                                Generate
+
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <!-- Filter -->
+            <div class="col-lg-6">
+
+                <form method="GET">
+
+                    <div class="row g-2">
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">
+                                Filter Month
+                            </label>
+
+                            <select name="month"
+                                    class="form-select form-select-sm">
+
+                                {% for value,name in months %}
+                                <option value="{{ value }}"
+                                    {% if value == selected_month %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ name }}
+                                </option>
+                                {% endfor %}
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">
+                                Year
+                            </label>
+
+                            <select name="year"
+                                    class="form-select form-select-sm">
+
+                                {% for year in years %}
+                                <option value="{{ year }}"
+                                    {% if year == selected_year %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ year }}
+                                </option>
+                                {% endfor %}
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                           <button type="submit"
+                                    class="btn btn-primary btn-sm w-100" style="visibility: hidden;">
+
+                                <i class="bi bi-funnel"></i>
+                                Filter
+
+                            </button>
+                            <button type="submit"
+                                    class="btn btn-primary btn-sm w-100">
+
+                                <i class="bi bi-funnel"></i>
+                                Filter
+
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
 
     </div>
+</div>
 
-    <table class="table table-bordered">
+    <!-- Invoice Table -->
 
-        <thead>
-            <tr>
-                <th>Branch</th>
-                <th>Month</th>
-                <th>Year</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+    <div class="card">
 
-        <tbody>
+        <div class="card-body">
 
-        {% for invoice in invoices %}
+            <table class="table table-bordered table-striped">
 
-            <tr>
+                <thead>
 
-                <td>
-                    {{ invoice.user.registration.First_name }}
-                </td>
+                    <tr>
+                        <th>Branch</th>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
 
-                <td>{{ invoice.get_month_display }}</td>
+                </thead>
 
-                <td>{{ invoice.year }}</td>
+                <tbody>
 
-                <td>₹ {{ invoice.total_amount }}</td>
+                    {% for invoice in invoices %}
 
-                <td>
+                    <tr>
 
-                    {% if invoice.status == 'Paid' %}
+                        <td>
+                            {{ invoice.user.registration.First_name }}
+                        </td>
 
-                        <span class="badge bg-success">
-                            Paid
-                        </span>
+                        <td>
+                            {{ invoice.get_month_display }}
+                        </td>
 
-                    {% else %}
+                        <td>
+                            {{ invoice.year }}
+                        </td>
 
-                        <span class="badge bg-danger">
-                            Pending
-                        </span>
+                        <td>
+                            ₹ {{ invoice.total_amount }}
+                        </td>
 
-                    {% endif %}
+                        <td>
 
-                </td>
+                            {% if invoice.status == 'Paid' %}
 
-                <td>
+                                <span class="badge bg-success">
+                                    Paid
+                                </span>
 
-                    <a href="{% url 'invoice_payment' invoice.id %}"
-                       class="btn btn-primary btn-sm">
+                            {% else %}
 
-                        Update Payment
+                                <span class="badge bg-danger">
+                                    Pending
+                                </span>
 
-                    </a>
+                            {% endif %}
 
-                </td>
+                        </td>
 
-            </tr>
+                        <td>
 
-        {% endfor %}
+                            <a href="{% url 'invoice_payment' invoice.id %}"
+                               class="btn btn-primary btn-sm">
 
-        </tbody>
+                                Update Payment
 
-    </table>
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6"
+                            class="text-center">
+
+                            No invoices found for
+                            {{ month_name }}
+                            {{ selected_year }}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
 
 </div>
